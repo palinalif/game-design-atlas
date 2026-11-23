@@ -1,10 +1,10 @@
 #threeShelf {
   height: clamp(480px, 66svh, 790px);
   margin-top: 12px;
-  border: 1px solid #765c43;
+  border: 1px solid #455143;
   border-radius: 9px;
-  background: #827763;
-  box-shadow: 0 12px 28px #65442b23;
+  background: #2d3d32;
+  box-shadow: 0 12px 28px #293a2c31;
 }
 #threeShelf canvas { touch-action: pan-y; }
 #threeCaseForm {

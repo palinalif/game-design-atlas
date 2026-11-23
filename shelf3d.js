@@ -24,12 +24,12 @@ function startShelf() {
   viewport.appendChild(canvas);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#827763');
-  scene.add(new THREE.HemisphereLight(0xffedcd, 0x9a9684, 1.53));
-  const daylight = new THREE.DirectionalLight(0xffe4b7, 2.15);
+  scene.background = new THREE.Color('#27382e');
+  scene.add(new THREE.HemisphereLight(0xffeddb, 0x948875, 1.46));
+  const daylight = new THREE.DirectionalLight(0xffdfb4, 2.28);
   daylight.position.set(-2.3, 2.65, 1.3);
   scene.add(daylight);
-  const bounce = new THREE.DirectionalLight(0xd5e1ed, .56);
+  const bounce = new THREE.DirectionalLight(0xdae6e8, .67);
   bounce.position.set(2, 1.3, 1.6);
   scene.add(bounce);
 
@@ -90,8 +90,9 @@ function startShelf() {
     previousFrame = now;
     const blend = reducedMotion.matches ? 1 : 1 - Math.exp(-elapsed / 52);
     pan *= 1 - blend;
-    camera.position.set(.179 + pan, .826, distance);
-    camera.lookAt(pan * .29, .728, .105);
+    const side = THREE.MathUtils.clamp(camera.aspect * .17, .17, .31);
+    camera.position.set(side + pan, .826, distance);
+    camera.lookAt(.026 + pan * .29, .728, .105);
 
     let animating = Math.abs(pan) > .001;
     for (const [id, item] of cases.entries) {
@@ -138,7 +139,7 @@ function startShelf() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     const halfAngle = THREE.MathUtils.degToRad(camera.fov / 2);
-    distance = .105 + Math.max(1.63, .92 / camera.aspect) / (2 * Math.tan(halfAngle));
+    distance = .105 + Math.max(1.60, .92 / camera.aspect) / (2 * Math.tan(halfAngle));
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, width < 550 ? 1.35 : 1.6));
     renderer.setSize(width, height, false);
     requestDraw();

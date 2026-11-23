@@ -1,60 +1,116 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { canvasTexture, kit, randomGenerator, surface } from './shelf-graphics.js';
 
 export const DECKS = [.983, .734, .485, .236];
 export const CASE_FRONT = .245;
 
+function paintWash(ctx, x, y, radiusX, radiusY, colorStops) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(radiusX, radiusY);
+  const wash = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  for (const [offset, color] of colorStops) wash.addColorStop(offset, color);
+  ctx.fillStyle = wash;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
+}
+
 function wallFinish(ctx, w, h) {
-  const color = ctx.createLinearGradient(0, h * .8, w, h * .19);
-  color.addColorStop(0, '#9d9b88');
-  color.addColorStop(.36, '#777c70');
-  color.addColorStop(1, '#57594e');
-  ctx.fillStyle = color;
+  const paint = ctx.createLinearGradient(w * .27, h * .56, w * .78, h);
+  paint.addColorStop(0, '#344a3e');
+  paint.addColorStop(.48, '#2a3d34');
+  paint.addColorStop(1, '#182923');
+  ctx.fillStyle = paint;
   ctx.fillRect(0, 0, w, h);
+
   const random = randomGenerator(31);
   for (let y = -5, row = 0; y < h; y += 41, row++) {
+    // Filled joints and a low-sheen paint coat soften the block edges.
+    const seam = ctx.createLinearGradient(0, y - 1, 0, y + 4);
+    seam.addColorStop(0, '#121e1500');
+    seam.addColorStop(.45, '#121e1540');
+    seam.addColorStop(.76, '#b4bfa311');
+    seam.addColorStop(1, '#b4bfa300');
+    ctx.fillStyle = seam;
+    ctx.fillRect(0, y - 1, w, 5);
     for (let x = row % 2 ? -48 : 0; x < w; x += 96) {
-      ctx.fillStyle = random() < .55 ? '#25282013' : '#d2d3a617';
-      ctx.fillRect(x + 1, y + 1, 94, 39);
-      ctx.fillStyle = '#1a221f39';
-      ctx.fillRect(x, y, 96, 1.5);
-      ctx.fillRect(x, y + 1, 1.5, 40);
-      ctx.fillStyle = '#d0d2b328';
-      ctx.fillRect(x + 1, y + 2, 94, 1);
+      const offset = Math.round(random() * 4) - 2;
+      ctx.fillStyle = random() < .53 ? '#aeb6940d' : '#13241912';
+      ctx.fillRect(x + offset + 1, y + 3, 93, 36);
+      ctx.fillStyle = '#12241a36';
+      ctx.fillRect(x + offset, y + 1, 1, 39);
+      ctx.fillStyle = '#b4bfa318';
+      ctx.fillRect(x + offset + 1, y + 3, 1, 36);
     }
   }
-  for (let i = 0; i < 25000; i++) {
-    ctx.fillStyle = random() < .44 ? '#31332a1f' : '#efd9b117';
-    ctx.fillRect(random() * w, random() * h, 1 + random() * 1.5, 1);
+
+  for (let i = 0; i < 720; i++) {
+    const x = random() * w;
+    const y = random() * h;
+    const radius = 2 + random() * 11;
+    paintWash(ctx, x, y, radius, radius * .69, [
+      [0, i % 2 ? '#b1b99a12' : '#07160d1a'],
+      [1, '#07160d00'],
+    ]);
   }
-  ctx.save();
-  ctx.scale(1, .76);
-  const lamp = ctx.createRadialGradient(w * .646, h * .98, 0, w * .646, h * .98, 137);
-  lamp.addColorStop(0, '#ffc9817a');
-  lamp.addColorStop(.48, '#d3a1642d');
-  lamp.addColorStop(1, '#d3a16400');
-  ctx.fillStyle = lamp;
-  ctx.fillRect(0, 0, w, h * 1.33);
-  ctx.restore();
+  for (let i = 0; i < 9500; i++) {
+    ctx.fillStyle = i % 2 ? '#e2d9a40e' : '#12241a27';
+    ctx.fillRect(random() * w, random() * h, .8 + random(), .85);
+  }
+
+  paintWash(ctx, w * .423, h * .55, w * .22, h * .32, [
+    [0, '#a4bbc649'],
+    [.40, '#84a4b532'],
+    [1, '#6c9baa00'],
+  ]);
+  paintWash(ctx, w * .648, h * .782, w * .123, h * .255, [
+    [0, '#f3ba7392'],
+    [.27, '#ce935959'],
+    [.58, '#b777452c'],
+    [1, '#9f674100'],
+  ]);
 }
 
 function windowView(ctx, w, h) {
   const background = ctx.createLinearGradient(0, 0, 0, h);
-  background.addColorStop(0, '#d0e0d0');
-  background.addColorStop(.5, '#eff1cb');
-  background.addColorStop(1, '#858e62');
+  background.addColorStop(0, '#adc8ce');
+  background.addColorStop(.5, '#b4c5aa');
+  background.addColorStop(1, '#61766a');
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, w, h);
   const random = randomGenerator(19);
   ctx.filter = 'blur(4px)';
   for (let i = 0; i < 200; i++) {
     const height = random();
-    ctx.fillStyle = ['#acc18d71', '#5c775d61', '#f6e7ac79', '#c9d29382'][i % 4];
+    ctx.fillStyle = ['#9cb29263', '#3d615b70', '#e4d8a863', '#a7bdac6c'][i % 4];
     ctx.beginPath();
     ctx.ellipse(w * random(), h * (.38 + height * .68), 12 + random() * 34, 6 + random() * 27, random(), 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+function glassFinish(ctx, w, h) {
+  const tint = ctx.createLinearGradient(w * .1, 0, w * .72, h);
+  tint.addColorStop(0, '#374641');
+  tint.addColorStop(.48, '#222f2c');
+  tint.addColorStop(1, '#151e1c');
+  ctx.fillStyle = tint;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.save();
+  ctx.translate(w * .12, h * .07);
+  ctx.transform(1, .06, -.11, 1, 0, 0);
+  ctx.filter = 'blur(2px)';
+  ctx.fillStyle = '#b2cac24d';
+  ctx.fillRect(0, 0, w * .22, h * .11);
+  ctx.fillRect(w * .237, 0, w * .16, h * .11);
+  ctx.restore();
+  paintWash(ctx, w * .26, h * .19, w * .51, h * .43, [
+    [0, '#8da9a622'],
+    [1, '#8da9a600'],
+  ]);
 }
 
 function framedPrint(ctx, w, h) {
@@ -89,7 +145,12 @@ function shadowMap(ctx, w, h) {
 }
 
 function fabricFinish(ctx, w, h) {
-  ctx.fillStyle = '#e4bb7d';
+  const linen = ctx.createLinearGradient(0, 0, 0, h);
+  linen.addColorStop(0, '#b9895d');
+  linen.addColorStop(.36, '#e6b97f');
+  linen.addColorStop(.76, '#dfaf77');
+  linen.addColorStop(1, '#bb8a5d');
+  ctx.fillStyle = linen;
   ctx.fillRect(0, 0, w, h);
   for (let x = 0; x < w; x++) {
     ctx.fillStyle = x % 4 < 2 ? '#764a322b' : '#fff2be35';
@@ -97,6 +158,9 @@ function fabricFinish(ctx, w, h) {
   }
   ctx.fillStyle = '#80593537';
   for (let y = 2; y < h; y += 3) ctx.fillRect(0, y, w, 1);
+  ctx.fillStyle = '#75513266';
+  ctx.fillRect(0, 0, w, 2);
+  ctx.fillRect(0, h - 3, w, 3);
 }
 
 // Merge opaque static meshes by material. Props need no per-object updates.
@@ -131,13 +195,13 @@ export function buildRoom(world, redraw) {
   const painted = (w, h, draw, options) => keep(new THREE.MeshBasicMaterial({
     map: keep(canvasTexture(w, h, draw)), ...options,
   }));
-  const board = mat('#edcbb0', { roughness: .66 });
-  const edge = mat('#edcea9', { roughness: .58 });
-  const back = mat('#b19378');
+  const board = mat('#edc7a7', { roughness: .66 });
+  const edge = mat('#f4d6af', { roughness: .58 });
+  const back = mat('#bb9d82');
   const floor = mat('#b39a7f');
   const legs = mat('#a18169');
   const brass = mat('#a98a58', { metalness: .32, roughness: .43 });
-  const trim = mat('#b9aa8d');
+  const trim = mat('#89745e');
   const shadowTex = keep(canvasTexture(128, 128, shadowMap));
   const contact = keep(new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: .64 }));
   const occlusion = keep(new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: .61 }));
@@ -171,9 +235,9 @@ export function buildRoom(world, redraw) {
   plane(scene, 1.55, 1.69, .066, .67, -.028, occlusion);
 
   // The recessed window sits under the ceiling, above the outdoor soil line.
-  const well = mat('#626353');
-  const windowFrame = mat('#c2bca5');
-  const conduit = mat('#575c55', { roughness: .65 });
+  const well = mat('#414336');
+  const windowFrame = mat('#b1a98e');
+  const conduit = mat('#4b5243', { roughness: .73 });
   box(scene, 4.7, .065, .149, 0, 1.541, .042, well);
   box(scene, 4.7, .018, .08, 0, 1.492, .022, conduit);
   box(scene, .676, .223, .037, -.342, 1.364, .010, well);
@@ -200,7 +264,7 @@ export function buildRoom(world, redraw) {
     box(cabinet, .727, .012, .006, 0, y - .006, .331, edge);
     if (y !== 1.223) plane(cabinet, .705, .144, 0, y + .192, .038, occlusion);
   }
-  box(cabinet, .707, .091, .27, 0, .164, .165, board);
+  mesh(cabinet, keep(new RoundedBoxGeometry(.707, .091, .27, 1, .005)), board, 0, .164, .165);
   box(cabinet, .666, .006, .008, 0, .207, .304, edge);
   for (const x of [-.301, .301]) {
     for (const z of [.070, .267]) {
@@ -213,9 +277,9 @@ export function buildRoom(world, redraw) {
   }
 
   const rugTexture = painted(512, 384, (ctx, w, h) => {
-    ctx.fillStyle = '#855e4e';
+    ctx.fillStyle = '#795144';
     ctx.fillRect(0, 0, w, h);
-    for (const [i, tint] of ['#5f443b', '#bd9069', '#69453a', '#b3825d'].entries()) {
+    for (const [i, tint] of ['#47332c', '#b08761', '#60453d', '#ad805c'].entries()) {
       const inset = 7 + i * 10;
       ctx.strokeStyle = tint;
       ctx.lineWidth = i % 2 ? 3 : 8;
@@ -233,11 +297,11 @@ export function buildRoom(world, redraw) {
   television.position.set(-.674, .260, .231);
   television.rotation.y = .14;
   scene.add(television);
-  const tvShell = mat('#5c5148', { roughness: .65 });
+  const tvShell = mat('#4c4640', { roughness: .68 });
   const tvBezel = mat('#312c27');
-  const panel = mat('#867669');
-  box(television, .367, .265, .224, 0, .147, 0, tvShell);
-  box(television, .378, .272, .041, 0, .147, .120, panel);
+  const panel = mat('#827265');
+  mesh(television, keep(new RoundedBoxGeometry(.367, .265, .224, 2, .016)), tvShell, 0, .147, 0);
+  mesh(television, keep(new RoundedBoxGeometry(.378, .272, .041, 2, .012)), panel, 0, .147, .120);
   const screenShape = new THREE.Shape();
   screenShape.moveTo(-.139, -.076);
   screenShape.quadraticCurveTo(-.138, -.097, -.114, -.100);
@@ -250,7 +314,12 @@ export function buildRoom(world, redraw) {
   screenShape.quadraticCurveTo(-.145, 0, -.139, -.076);
   const screenMesh = keep(new THREE.ShapeGeometry(screenShape, 10));
   mesh(television, screenMesh, tvBezel, -.027, .153, .143);
-  const glass = mesh(television, screenMesh, mat('#323e3d', { roughness: .37, emissive: '#193633', emissiveIntensity: .13 }), -.027, .153, .1442);
+  const position = screenMesh.attributes.position;
+  const uv = screenMesh.attributes.uv;
+  for (let index = 0; index < uv.count; index++) {
+    uv.setXY(index, .5 + position.getX(index) / .29, .5 + position.getY(index) / .21);
+  }
+  const glass = mesh(television, screenMesh, painted(256, 192, glassFinish), -.027, .153, .1442);
   glass.scale.set(.92, .90, 1);
   for (let i = 0; i < 7; i++) box(television, .024, .002, .002, .151, .190 - i * .009, .142, tvBezel);
   mesh(television, keep(new THREE.SphereGeometry(.0034, 9, 7)), mat('#7b9864', { emissive: '#576d46' }), .151, .078, .142);
@@ -295,7 +364,7 @@ export function buildRoom(world, redraw) {
     side: THREE.DoubleSide,
   });
   mesh(lamp, keep(new THREE.CylinderGeometry(.068, .119, .150, 36, 1, true)), shade, 0, .258, 0);
-  const lampLight = new THREE.PointLight(0xffb867, .53, 1.5, 2);
+  const lampLight = new THREE.PointLight(0xffb267, .42, 1.3, 2);
   lampLight.position.set(.704, .551, .226);
   scene.add(lampLight);
   for (const [i, color] of ['#a85a46', '#baa984', '#6f735d'].entries()) {
