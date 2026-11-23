@@ -243,12 +243,12 @@ export function buildRoom(world, redraw) {
     map: keep(canvasTexture(w, h, draw)), ...options,
   }));
   const board = mat('#edc7a7', { roughness: .56 });
-  const cabinetBoard = mat('#f5d9ba', { roughness: .56 });
-  const edge = mat('#f9dfc1', { roughness: .46 });
-  const back = mat('#c8ab90');
+  const cabinetBoard = mat('#fff6e8', { roughness: .56 });
+  const edge = mat('#f1d7b9', { roughness: .46 });
+  const back = mat('#e0c6a7');
   const floor = mat('#b39a7f');
   const legs = mat('#a18169');
-  const cabinetFeet = mat('#ac8d73');
+  const cabinetFeet = mat('#c6a47e');
   const brass = mat('#a98a58', { metalness: .32, roughness: .43 });
   const trim = mat('#89745e');
   const shadowTex = keep(canvasTexture(128, 128, shadowMap));
@@ -256,43 +256,40 @@ export function buildRoom(world, redraw) {
   const occlusion = keep(new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: .61 }));
   const atFloor = (w, d, x, z) => plane(scene, w, d, x, .001, z, contact).rotation.x = -Math.PI / 2;
   let disposed = false;
-  const woodFinishes = [
-    [board, false, .012], [cabinetBoard, false, .012], [edge, false, .008], [floor, false, .014],
-    [back, true, .010], [legs, true, .008], [cabinetFeet, true, .008],
+  const cabinetFinishes = [
+    [cabinetBoard, false, .012], [edge, false, .008],
+    [back, true, .010], [cabinetFeet, true, .008],
   ];
+  const otherWood = [[board, false, .012], [floor, false, .014], [legs, true, .008]];
+  const textureLoader = new THREE.TextureLoader();
 
-  new THREE.TextureLoader().load('./assets/shelf-wood.webp', texture => {
-    if (disposed) return texture.dispose();
-    keep(texture);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.anisotropy = 4;
-    const vertical = keep(texture.clone());
-    vertical.center.set(.5, .5);
-    vertical.rotation = Math.PI / 2;
-    for (const [material, verticalGrain] of woodFinishes) {
-      material.map = verticalGrain ? vertical : texture;
-      material.needsUpdate = true;
-    }
-    redraw();
-
-    new THREE.TextureLoader().load('./assets/shelf-wood-height.webp', bump => {
-      if (disposed) return bump.dispose();
-      keep(bump);
-      bump.colorSpace = THREE.NoColorSpace;
-      bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
-      bump.anisotropy = 4;
-      const verticalBump = keep(bump.clone());
-      verticalBump.center.copy(vertical.center);
-      verticalBump.rotation = vertical.rotation;
-      for (const [material, verticalGrain, depth] of woodFinishes) {
-        material.bumpMap = verticalGrain ? verticalBump : bump;
-        material.bumpScale = depth;
+  function loadWoodTexture(path, finishes, height = false) {
+    textureLoader.load(path, texture => {
+      if (disposed) return texture.dispose();
+      keep(texture);
+      texture.colorSpace = height ? THREE.NoColorSpace : THREE.SRGBColorSpace;
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = 4;
+      const vertical = keep(texture.clone());
+      vertical.center.set(.5, .5);
+      vertical.rotation = Math.PI / 2;
+      for (const [material, verticalGrain, bumpScale] of finishes) {
+        const map = verticalGrain ? vertical : texture;
+        if (height) {
+          material.bumpMap = map;
+          material.bumpScale = bumpScale;
+        } else {
+          material.map = map;
+        }
         material.needsUpdate = true;
       }
       redraw();
-    }, undefined, () => { /* The wood color remains visible without the height map. */ });
-  }, undefined, () => { /* The wood tones remain available when the map cannot load. */ });
+    }, undefined, () => { /* Keep the finishes already available when a texture fails. */ });
+  }
+
+  loadWoodTexture('./assets/shelf-wood.webp', otherWood);
+  loadWoodTexture('./assets/shelf-cabinet-wood.webp', cabinetFinishes);
+  loadWoodTexture('./assets/shelf-wood-height.webp', [...cabinetFinishes, ...otherWood], true);
 
   const wallMap = keep(canvasTexture(1536, 896, (ctx, w, h) => wallFinish(ctx, w, h)));
   const wall = mat('#fff6e8', { map: wallMap, roughness: .98 });
@@ -374,7 +371,7 @@ export function buildRoom(world, redraw) {
     box(cabinet, .011, 1.133, .010, x, .682, .323, edge);
   }
   const crown = keep(new RoundedBoxGeometry(.747, .031, .326, 1, .004));
-  mesh(cabinet, crown, board, 0, 1.218, .166);
+  mesh(cabinet, crown, cabinetBoard, 0, 1.218, .166);
   box(cabinet, .737, .008, .015, 0, 1.22, .329, edge);
   for (const y of DECKS) {
     box(cabinet, .743, .020, .321, 0, y - .010, .167, cabinetBoard);
@@ -383,7 +380,7 @@ export function buildRoom(world, redraw) {
   }
   box(cabinet, .700, .087, .25, 0, .164, .145, back);
   const drawer = keep(new RoundedBoxGeometry(.340, .081, .024, 1, .003));
-  for (const x of [-.174, .174]) mesh(cabinet, drawer, board, x, .164, .282);
+  for (const x of [-.174, .174]) mesh(cabinet, drawer, cabinetBoard, x, .164, .282);
   box(cabinet, .676, .006, .009, 0, .203, .294, edge);
   for (const x of [-.301, .301]) {
     for (const z of [.070, .267]) {
