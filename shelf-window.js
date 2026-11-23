@@ -138,13 +138,13 @@ function beamMask(ctx, w, h) {
 export function addWindowDust(scene, k) {
   const beam = new THREE.BufferGeometry();
   beam.setAttribute('position', new THREE.Float32BufferAttribute([
-    -.605, 1.39, .11, -.100, 1.39, .11, .487, .54, 1.43, -.341, .54, 1.43,
+    -.605, 1.39, .11, -.100, 1.39, .11, -.064, .40, 1.16, -.825, .40, 1.16,
   ], 3));
   beam.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
   beam.setIndex([0, 1, 2, 0, 2, 3]);
   const veil = k.keep(new THREE.MeshBasicMaterial({
     map: k.keep(canvasTexture(64, 96, beamMask)),
-    color: '#afbbb4', opacity: .075, transparent: true, depthWrite: false,
+    color: '#afbbb4', opacity: .094, transparent: true, depthWrite: false,
     blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
   }));
   k.mesh(scene, k.keep(beam), veil, 0, 0, 0);
@@ -154,9 +154,9 @@ export function addWindowDust(scene, k) {
   for (let i = 0; i < 58; i++) {
     const reach = .23 + random() * .71;
     positions.push(
-      -.44 + reach * .33 + (random() - .5) * (.43 + reach * .24),
-      1.39 - reach * .85 + (random() - .5) * .21,
-      .11 + reach * 1.32,
+      -.37 - reach * .14 + (random() - .5) * (.43 + reach * .21),
+      1.39 - reach * .99 + (random() - .5) * .16,
+      .11 + reach * 1.05,
     );
   }
   const scatter = k.keep(new THREE.BufferGeometry());

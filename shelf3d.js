@@ -20,7 +20,7 @@ function startShelf() {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
   const canvas = renderer.domElement;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.20;
+  renderer.toneMappingExposure = 1.22;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.shadowMap.autoUpdate = false;
@@ -29,10 +29,10 @@ function startShelf() {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#27382e');
-  scene.add(new THREE.HemisphereLight(0xe1e6e8, 0xa18469, 1.06));
-  const daylight = new THREE.SpotLight(0xe6edf4, 5.4, 3.9, .84, .86, 2);
+  scene.add(new THREE.HemisphereLight(0xe4e9e7, 0xa48a74, 1.06));
+  const daylight = new THREE.SpotLight(0xe9f2ff, 7.4, 3.9, .59, .75, 2);
   daylight.position.copy(WINDOW_CENTER).add(new THREE.Vector3(0, .029, .049));
-  daylight.target.position.set(.07, .50, 1.18);
+  daylight.target.position.set(-.54, .34, .97);
   daylight.castShadow = true;
   daylight.shadow.mapSize.set(1024, 1024);
   daylight.shadow.camera.near = .04;
@@ -43,9 +43,10 @@ function startShelf() {
   scene.add(daylight, daylight.target);
 
   // Broad reflected light reaches the front of the cabinet from the room.
-  const bounce = new THREE.DirectionalLight(0xffe7cd, 1.8);
-  bounce.position.set(1.2, 1.65, 2.1);
-  scene.add(bounce);
+  const bounce = new THREE.SpotLight(0xe9edf3, 3.05, 3.7, 1.04, .93, 2);
+  bounce.position.set(-.83, 1.18, 1.19);
+  bounce.target.position.set(.09, .53, .26);
+  scene.add(bounce, bounce.target);
 
   const camera = new THREE.PerspectiveCamera(34, 1, .08, 12);
   const raycaster = new THREE.Raycaster();

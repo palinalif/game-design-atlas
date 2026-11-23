@@ -77,24 +77,12 @@ function blockTexture(ctx, w, h, image) {
 
 function wallFinish(ctx, w, h, masonry) {
   const paint = ctx.createLinearGradient(w * .27, h * .56, w * .78, h);
-  paint.addColorStop(0, '#344a3e');
-  paint.addColorStop(.48, '#2a3d34');
-  paint.addColorStop(1, '#182923');
+  paint.addColorStop(0, '#596e5c');
+  paint.addColorStop(.48, '#536958');
+  paint.addColorStop(1, '#455f51');
   ctx.fillStyle = paint;
   ctx.fillRect(0, 0, w, h);
   if (!masonry) paintedMortar(ctx, w, h);
-
-  paintWash(ctx, w * .423, h * .526, w * .15, h * .20, [
-    [0, '#a4bbc634'],
-    [.40, '#84a4b51e'],
-    [1, '#6c9baa00'],
-  ]);
-  paintWash(ctx, w * .648, h * .782, w * .123, h * .255, [
-    [0, '#f3ba7392'],
-    [.27, '#ce935959'],
-    [.58, '#b777452c'],
-    [1, '#9f674100'],
-  ]);
 
   if (masonry) blockTexture(ctx, w, h, masonry);
 
@@ -225,10 +213,9 @@ export function buildRoom(world, redraw) {
     redraw();
   }, undefined, () => { /* The wood tones remain available when the map cannot load. */ });
 
-  const wall = painted(1536, 896, (ctx, w, h) => wallFinish(ctx, w, h));
+  const wallMap = keep(canvasTexture(1536, 896, (ctx, w, h) => wallFinish(ctx, w, h)));
+  const wall = mat('#fff6e8', { map: wallMap, roughness: .98 });
   plane(scene, 4.7, 2.8, 0, 1.38, -.033, wall);
-  const wallShadows = keep(new THREE.ShadowMaterial({ opacity: .23, depthWrite: false }));
-  plane(scene, 4.7, 2.8, 0, 1.38, -.030, wallShadows).receiveShadow = true;
   const returnMap = keep(wall.map.clone());
   returnMap.repeat.x = .34;
   returnMap.offset.x = .15;
@@ -243,7 +230,7 @@ export function buildRoom(world, redraw) {
     returnMap.needsUpdate = true;
     redraw();
   }).catch(() => { /* Keep the procedural paint when the masonry photo is unavailable. */ });
-  const returnWall = keep(new THREE.MeshBasicMaterial({ map: returnMap, color: '#8a9b91' }));
+  const returnWall = mat('#b4bbb0', { map: returnMap, roughness: .98 });
   plane(scene, 1.59, 2.8, -1.10, 1.38, .76, returnWall).rotation.y = Math.PI / 2;
   box(scene, .018, .075, 1.59, -1.089, .038, .76, trim);
   box(scene, 4.7, .075, .021, 0, .038, -.010, trim);
@@ -438,13 +425,20 @@ export function buildRoom(world, redraw) {
   cylinder(.054, .066, .018, .009, brass);
   cylinder(.007, .013, .228, .124, brass);
   const shade = mat('#ffe5bc', {
-    map: keep(canvasTexture(192, 96, fabricFinish)), emissive: '#ec9b50', emissiveIntensity: .25,
+    map: keep(canvasTexture(192, 96, fabricFinish)), emissive: '#ec9b50', emissiveIntensity: .36,
     side: THREE.DoubleSide,
   });
   mesh(lamp, keep(new THREE.CylinderGeometry(.068, .119, .150, 36, 1, true)), shade, 0, .258, 0);
-  const lampLight = new THREE.PointLight(0xffb267, .42, 1.3, 2);
-  lampLight.position.set(.704, .551, .226);
-  scene.add(lampLight);
+  // The openings in the shade throw separate pools above and below the bulb.
+  for (const [intensity, targetY, angle] of [[.64, .25, .83], [.46, 1.30, .80]]) {
+    const pool = new THREE.SpotLight(0xffba77, intensity, 1.45, angle, .72, 2);
+    pool.position.set(.704, .614, .223);
+    pool.target.position.set(.704, targetY, .18);
+    scene.add(pool, pool.target);
+  }
+  const throughShade = new THREE.PointLight(0xffc186, .19, .9, 2);
+  throughShade.position.set(.704, .635, .223);
+  scene.add(throughShade);
   for (const [i, color] of ['#a85a46', '#baa984', '#6f735d'].entries()) {
     const book = box(scene, .111, .012, .084, .540, .390 + i * .011, .329, mat(color));
     book.rotation.y = .17 * (i - 1);
@@ -453,9 +447,10 @@ export function buildRoom(world, redraw) {
   mesh(scene, keep(new THREE.CylinderGeometry(.026, .022, .052, 24, 1, true)), mug, .777, .410, .321);
   mesh(scene, keep(new THREE.CircleGeometry(.024, 24)), mat('#50362b'), .777, .424, .321).rotation.x = -Math.PI / 2;
   mesh(scene, keep(new THREE.TorusGeometry(.016, .004, 8, 18)), mug, .805, .407, .321);
+  const roomSurfaces = new Set([floor, rug, wall, returnWall]);
   scene.traverse(object => {
     if (!object.isMesh || !object.material.isMeshStandardMaterial) return;
-    object.castShadow = object.material !== floor && object.material !== rug;
+    object.castShadow = !roomSurfaces.has(object.material);
     object.receiveShadow = true;
   });
   batchRoom(scene, k);
