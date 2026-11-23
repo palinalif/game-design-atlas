@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { buildRoom } from './shelf-room.js';
 import { buildCases, updateCover } from './shelf-cases.js';
 import { WINDOW_CENTER } from './shelf-window.js';
+import { buildRoomEnvironment } from './shelf-lighting.js';
 
 const { ROWS_PER_SHELF } = globalThis.PlayableShelfCatalog;
 
@@ -29,7 +30,8 @@ function startShelf() {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#27382e');
-  scene.add(new THREE.HemisphereLight(0xe4e9e7, 0xa48a74, 1.06));
+  const ambient = new THREE.HemisphereLight(0xe4e9e7, 0xa48a74, 1.06);
+  scene.add(ambient);
   const daylight = new THREE.SpotLight(0xe9f2ff, 7.4, 3.9, .59, .75, 2);
   daylight.position.copy(WINDOW_CENTER).add(new THREE.Vector3(0, .029, .049));
   daylight.target.position.set(-.54, .34, .97);
@@ -61,6 +63,7 @@ function startShelf() {
   highlight.visible = false;
 
   let room;
+  let roomEnvironment;
   let cases;
   let initialState;
   let signature;
@@ -231,6 +234,8 @@ function startShelf() {
     observer.disconnect();
     disposeCases();
     room?.dispose();
+    scene.environment = null;
+    roomEnvironment?.dispose();
     highlight.geometry.dispose();
     highlight.material.dispose();
     renderer.dispose();
@@ -286,6 +291,17 @@ function startShelf() {
   observer.observe(viewport);
 
   room = buildRoom(scene, requestDraw);
+  if (renderer.extensions.has('EXT_color_buffer_float')) {
+    try {
+      roomEnvironment = buildRoomEnvironment(renderer);
+      scene.environment = roomEnvironment.texture;
+      scene.environmentIntensity = .84;
+      ambient.intensity = .69;
+      bounce.intensity = 2.48;
+    } catch (error) {
+      console.info('PLAYABLE is using direct lighting.', error);
+    }
+  }
   window.PlayableShelf3D = { update };
   if (window.PLAYABLE_SHELF_3D_STATE) update(window.PLAYABLE_SHELF_3D_STATE);
 }

@@ -109,18 +109,49 @@ function glassFinish(ctx, w, h) {
   ctx.fillStyle = tint;
   ctx.fillRect(0, 0, w, h);
 
-  ctx.save();
-  ctx.translate(w * .12, h * .07);
-  ctx.transform(1, .06, -.11, 1, 0, 0);
-  ctx.filter = 'blur(2px)';
-  ctx.fillStyle = '#b2cac24d';
-  ctx.fillRect(0, 0, w * .22, h * .11);
-  ctx.fillRect(w * .237, 0, w * .16, h * .11);
-  ctx.restore();
   paintWash(ctx, w * .26, h * .19, w * .51, h * .43, [
     [0, '#8da9a622'],
     [1, '#8da9a600'],
   ]);
+}
+
+function curvedTubeGlass(shape) {
+  const edge = shape.getPoints(6);
+  if (edge[0].equals(edge.at(-1))) edge.pop();
+  if (THREE.ShapeUtils.isClockWise(edge)) edge.reverse();
+
+  const positions = [0, 0, .019];
+  const normals = [0, 0, 1];
+  const uvs = [.5, .5];
+  const indices = [];
+  const rings = 8;
+  const count = edge.length;
+  for (let ring = 1; ring <= rings; ring++) {
+    const radius = ring / rings;
+    const start = 1 + (ring - 1) * count;
+    for (const [index, point] of edge.entries()) {
+      const x = point.x * radius;
+      const y = point.y * radius;
+      const glassX = x * .92;
+      const glassY = y * .90;
+      const nx = glassX / .135;
+      const ny = glassY / .097;
+      positions.push(glassX, glassY, .019 - .009 * (nx * nx + ny * ny));
+      const normal = new THREE.Vector3(.018 * nx / .135, .018 * ny / .097, 1).normalize();
+      normals.push(normal.x, normal.y, normal.z);
+      uvs.push(.5 + x / .29, .5 + y / .21);
+      const a = start + index;
+      const b = start + (index + 1) % count;
+      if (ring === 1) indices.push(0, a, b);
+      else indices.push(a - count, a, b, a - count, b, b - count);
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+  return geometry;
 }
 
 function shadowMap(ctx, w, h) {
@@ -185,8 +216,8 @@ export function buildRoom(world, redraw) {
   const painted = (w, h, draw, options) => keep(new THREE.MeshBasicMaterial({
     map: keep(canvasTexture(w, h, draw)), ...options,
   }));
-  const board = mat('#edc7a7', { roughness: .66 });
-  const edge = mat('#f4d6af', { roughness: .58 });
+  const board = mat('#edc7a7', { roughness: .56 });
+  const edge = mat('#f4d6af', { roughness: .46 });
   const back = mat('#bb9d82');
   const floor = mat('#b39a7f');
   const legs = mat('#a18169');
@@ -368,13 +399,11 @@ export function buildRoom(world, redraw) {
   screenShape.quadraticCurveTo(-.145, 0, -.139, -.076);
   const screenMesh = keep(new THREE.ShapeGeometry(screenShape, 10));
   mesh(television, screenMesh, tvBezel, -.027, .153, .143);
-  const position = screenMesh.attributes.position;
-  const uv = screenMesh.attributes.uv;
-  for (let index = 0; index < uv.count; index++) {
-    uv.setXY(index, .5 + position.getX(index) / .29, .5 + position.getY(index) / .21);
-  }
-  const glass = mesh(television, screenMesh, painted(256, 192, glassFinish), -.027, .153, .1442);
-  glass.scale.set(.92, .90, 1);
+  const tubeGlass = keep(new THREE.MeshPhysicalMaterial({
+    map: keep(canvasTexture(256, 192, glassFinish)),
+    roughness: .24, clearcoat: .64, clearcoatRoughness: .20,
+  }));
+  mesh(television, keep(curvedTubeGlass(screenShape)), tubeGlass, -.027, .153, .1442);
   for (let i = 0; i < 7; i++) box(television, .024, .002, .002, .151, .190 - i * .009, .142, tvBezel);
   mesh(television, keep(new THREE.SphereGeometry(.0034, 9, 7)), mat('#7b9864', { emissive: '#576d46' }), .151, .078, .142);
   box(scene, .415, .025, .331, -.674, .256, .215, board);

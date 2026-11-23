@@ -84,7 +84,10 @@ export function buildCases(scene, rows, shadowTex, firstPage) {
     map: shadowTex, transparent: true, depthWrite: false, opacity: .75,
   }));
   const cardboard = new Map();
-  const finish = material('#ede5d4', { roughness: .17, transparent: true, opacity: .15, depthWrite: false });
+  const finish = k.keep(new THREE.MeshPhysicalMaterial({
+    color: '#868781', roughness: .22, clearcoat: .70, clearcoatRoughness: .22,
+    transparent: true, opacity: .17, depthWrite: false,
+  }));
   const sticker = printed(canvasTexture(128, 64, (ctx, w, h) => {
     ctx.fillStyle = '#dbc097';
     ctx.fillRect(0, 0, w, h);
