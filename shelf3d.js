@@ -19,17 +19,27 @@ function startShelf() {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'low-power' });
   const canvas = renderer.domElement;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.16;
+  renderer.toneMappingExposure = 1.20;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.autoUpdate = false;
   canvas.setAttribute('aria-hidden', 'true');
   viewport.appendChild(canvas);
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#27382e');
-  scene.add(new THREE.HemisphereLight(0xffeddb, 0x948875, 1.46));
-  const daylight = new THREE.DirectionalLight(0xffdfb4, 2.28);
-  daylight.position.set(-2.3, 2.65, 1.3);
-  scene.add(daylight);
-  const bounce = new THREE.DirectionalLight(0xdae6e8, .67);
+  scene.add(new THREE.HemisphereLight(0xffede0, 0x827568, 1.09));
+  const daylight = new THREE.DirectionalLight(0xffddb4, 2.46);
+  daylight.position.set(-1.42, 2.26, 1.02);
+  daylight.target.position.set(.03, .61, .21);
+  daylight.castShadow = true;
+  daylight.shadow.mapSize.set(1024, 1024);
+  Object.assign(daylight.shadow.camera, { left: -1.50, right: 1.50, bottom: -1.35, top: 1.35, near: .15, far: 4.6 });
+  daylight.shadow.normalBias = .003;
+  daylight.shadow.radius = 3;
+  daylight.shadow.intensity = .68;
+  scene.add(daylight, daylight.target);
+  const bounce = new THREE.DirectionalLight(0xd9e6ed, .76);
   bounce.position.set(2, 1.3, 1.6);
   scene.add(bounce);
 
@@ -90,9 +100,9 @@ function startShelf() {
     previousFrame = now;
     const blend = reducedMotion.matches ? 1 : 1 - Math.exp(-elapsed / 52);
     pan *= 1 - blend;
-    const side = THREE.MathUtils.clamp(camera.aspect * .17, .17, .31);
-    camera.position.set(side + pan, .826, distance);
-    camera.lookAt(.026 + pan * .29, .728, .105);
+    const wide = THREE.MathUtils.smoothstep(camera.aspect, .80, 1.75);
+    camera.position.set(.231 + wide * .41 + pan, .83 + wide * .08, distance);
+    camera.lookAt(.012 - wide * .18 + pan * .29, .713, .105);
 
     let animating = Math.abs(pan) > .001;
     for (const [id, item] of cases.entries) {
@@ -177,6 +187,7 @@ function startShelf() {
         selected = null;
         disposeCases();
         cases = buildCases(scene, rows, room.shadowTex, page === 0);
+        renderer.shadowMap.needsUpdate = true;
         picker.replaceChildren(new Option('Find a case on this shelf', ''));
         for (const { game } of cases.entries.values()) picker.add(new Option(game.title, game.id));
       }

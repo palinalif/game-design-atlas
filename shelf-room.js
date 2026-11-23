@@ -182,7 +182,9 @@ function batchRoom(root, kit) {
     buffers.forEach(buffer => buffer.dispose());
     if (!merged) continue;
     for (const object of objects) object.removeFromParent();
-    kit.mesh(root, kit.keep(merged), material, 0, 0, 0);
+    const batch = kit.mesh(root, kit.keep(merged), material, 0, 0, 0);
+    batch.castShadow = objects[0].castShadow;
+    batch.receiveShadow = objects[0].receiveShadow;
   }
 }
 
@@ -223,23 +225,34 @@ export function buildRoom(world, redraw) {
     redraw();
   }, undefined, () => { /* The wood tones remain available when the map cannot load. */ });
 
-  plane(scene, 4.7, 2.8, 0, 1.38, -.033, painted(1024, 640, wallFinish));
+  const wall = painted(1024, 640, wallFinish);
+  plane(scene, 4.7, 2.8, 0, 1.38, -.033, wall);
+  const wallShadows = keep(new THREE.ShadowMaterial({ opacity: .23, depthWrite: false }));
+  plane(scene, 4.7, 2.8, 0, 1.38, -.030, wallShadows).receiveShadow = true;
+  const returnMap = keep(wall.map.clone());
+  returnMap.repeat.x = .34;
+  returnMap.offset.x = .15;
+  returnMap.needsUpdate = true;
+  const returnWall = keep(new THREE.MeshBasicMaterial({ map: returnMap, color: '#8a9b91' }));
+  plane(scene, 1.59, 2.8, -1.10, 1.38, .76, returnWall).rotation.y = Math.PI / 2;
+  box(scene, .018, .075, 1.59, -1.089, .038, .76, trim);
   box(scene, 4.7, .075, .021, 0, .038, -.010, trim);
   box(scene, 4.7, .006, .026, 0, .074, -.009, trim);
   for (let i = 0; i < 14; i++) {
-    const plank = box(scene, 4.65, .022, .167, 0, -.013, .084 + i * .168, floor);
-    plank.receiveShadow = true;
+    box(scene, 4.65, .022, .167, 0, -.013, .084 + i * .168, floor);
   }
   atFloor(1.22, .73, .07, .23);
   atFloor(.74, .55, .89, .31);
-  plane(scene, 1.55, 1.69, .066, .67, -.028, occlusion);
+
 
   // The recessed window sits under the ceiling, above the outdoor soil line.
   const well = mat('#414336');
   const windowFrame = mat('#b1a98e');
   const conduit = mat('#4b5243', { roughness: .73 });
-  box(scene, 4.7, .065, .149, 0, 1.541, .042, well);
-  box(scene, 4.7, .018, .08, 0, 1.492, .022, conduit);
+  box(scene, 3.45, .065, .149, .625, 1.541, .042, well);
+  box(scene, 3.45, .018, .08, .625, 1.492, .022, conduit);
+  box(scene, .153, .065, 1.56, -1.042, 1.541, .806, well);
+  box(scene, .079, .018, 1.56, -1.061, 1.492, .806, conduit);
   box(scene, .676, .223, .037, -.342, 1.364, .010, well);
   plane(scene, .630, .195, -.342, 1.365, .032, painted(416, 144, windowView));
   box(scene, .676, .019, .061, -.342, 1.260, .048, windowFrame);
@@ -247,9 +260,18 @@ export function buildRoom(world, redraw) {
   for (const x of [-.670, -.342, -.014]) box(scene, .020, .206, .045, x, 1.364, .046, windowFrame);
   box(scene, .693, .015, .090, -.342, 1.250, .043, trim);
 
-  const pipe = keep(new THREE.CylinderGeometry(.014, .014, 2.85, 10));
-  mesh(scene, pipe, conduit, .135, 1.46, .085).rotation.z = Math.PI / 2;
+  const pipePath = new THREE.CurvePath();
+  const start = new THREE.Vector3(-1.018, 1.46, 1.50);
+  const bendStart = new THREE.Vector3(-1.018, 1.46, .154);
+  const corner = new THREE.Vector3(-1.018, 1.46, .085);
+  const bendEnd = new THREE.Vector3(-.949, 1.46, .085);
+  const end = new THREE.Vector3(1.56, 1.46, .085);
+  pipePath.add(new THREE.LineCurve3(start, bendStart));
+  pipePath.add(new THREE.QuadraticBezierCurve3(bendStart, corner, bendEnd));
+  pipePath.add(new THREE.LineCurve3(bendEnd, end));
+  mesh(scene, keep(new THREE.TubeGeometry(pipePath, 104, .013, 9)), conduit, 0, 0, 0);
   for (const x of [-.904, .456, 1.210]) box(scene, .018, .043, .034, x, 1.459, .08, brass);
+  for (const z of [.36, 1.03]) box(scene, .034, .043, .018, -1.023, 1.459, z, brass);
 
   const cabinet = new THREE.Group();
   scene.add(cabinet);
@@ -258,25 +280,31 @@ export function buildRoom(world, redraw) {
     box(cabinet, .029, 1.139, .300, x, .682, .169, board);
     box(cabinet, .011, 1.133, .010, x, .682, .323, edge);
   }
-  for (const y of [...DECKS, 1.223]) {
-    const shelf = box(cabinet, .743, .020, .321, 0, y - .010, .167, board);
-    shelf.receiveShadow = true;
+  const crown = keep(new RoundedBoxGeometry(.747, .031, .326, 1, .004));
+  mesh(cabinet, crown, board, 0, 1.218, .166);
+  box(cabinet, .737, .008, .015, 0, 1.22, .329, edge);
+  for (const y of DECKS) {
+    box(cabinet, .743, .020, .321, 0, y - .010, .167, board);
     box(cabinet, .727, .012, .006, 0, y - .006, .331, edge);
-    if (y !== 1.223) plane(cabinet, .705, .144, 0, y + .192, .038, occlusion);
+    plane(cabinet, .705, .144, 0, y + .192, .038, occlusion);
   }
-  mesh(cabinet, keep(new RoundedBoxGeometry(.707, .091, .27, 1, .005)), board, 0, .164, .165);
-  box(cabinet, .666, .006, .008, 0, .207, .304, edge);
+  box(cabinet, .700, .087, .25, 0, .164, .145, back);
+  const drawer = keep(new RoundedBoxGeometry(.340, .081, .024, 1, .003));
+  for (const x of [-.174, .174]) mesh(cabinet, drawer, board, x, .164, .282);
+  box(cabinet, .676, .006, .009, 0, .203, .294, edge);
   for (const x of [-.301, .301]) {
     for (const z of [.070, .267]) {
       const foot = box(cabinet, .041, .145, .041, x, .073, z, legs);
       foot.rotation.z = -Math.sign(x) * .09;
     }
   }
-  for (const x of [-.186, .186]) {
-    box(cabinet, .065, .009, .017, x, .166, .314, brass);
+  for (const x of [-.174, .174]) {
+    box(cabinet, .006, .014, .010, x - .023, .170, .297, brass);
+    box(cabinet, .006, .014, .010, x + .023, .170, .297, brass);
+    box(cabinet, .055, .009, .007, x, .170, .304, brass);
   }
 
-  const rugTexture = painted(512, 384, (ctx, w, h) => {
+  const rugTexture = keep(canvasTexture(512, 384, (ctx, w, h) => {
     ctx.fillStyle = '#795144';
     ctx.fillRect(0, 0, w, h);
     for (const [i, tint] of ['#47332c', '#b08761', '#60453d', '#ad805c'].entries()) {
@@ -285,13 +313,47 @@ export function buildRoom(world, redraw) {
       ctx.lineWidth = i % 2 ? 3 : 8;
       ctx.strokeRect(inset, inset, w - inset * 2, h - inset * 2);
     }
+    // Small repeated diamonds along the selvedge imitate a woven border.
+    ctx.fillStyle = '#bf947069';
+    for (let x = 39; x < w - 31; x += 12) {
+      for (const y of [26, h - 26]) {
+        ctx.beginPath();
+        ctx.moveTo(x, y - 3);
+        ctx.lineTo(x + 4, y);
+        ctx.lineTo(x, y + 3);
+        ctx.lineTo(x - 4, y);
+        ctx.fill();
+      }
+    }
     const rand = randomGenerator(71);
     for (let i = 0; i < 9000; i++) {
       ctx.fillStyle = rand() < .48 ? '#d9af8532' : '#2a202334';
       ctx.fillRect(rand() * w, rand() * h, 1 + rand() * 3, 1);
     }
-  });
-  plane(scene, 1.46, .86, .11, .002, .61, rugTexture).rotation.x = -Math.PI / 2;
+  }));
+  const rug = mat('#fff1de', { map: rugTexture });
+  plane(scene, 1.46, .86, .11, .002, .61, rug).rotation.x = -Math.PI / 2;
+
+  // The chair arm in the foreground places the viewer in the sitting area.
+  const upholstery = keep(canvasTexture(192, 192, (ctx, w, h) => {
+    ctx.fillStyle = '#7a503c';
+    ctx.fillRect(0, 0, w, h);
+    const rand = randomGenerator(72);
+    for (let i = 0; i < 18000; i++) {
+      ctx.fillStyle = i % 2 ? '#edb9872b' : '#251e284c';
+      ctx.fillRect(rand() * w, rand() * h, 1 + rand() * 2, 1);
+    }
+  }));
+  const fabric = mat('#cda58d', { map: upholstery });
+  const piping = mat('#593929');
+  const chair = new THREE.Group();
+  chair.position.set(-.943, 0, 1.084);
+  chair.rotation.y = .16;
+  scene.add(chair);
+  mesh(chair, keep(new RoundedBoxGeometry(.32, .289, .53, 2, .047)), fabric, 0, .148, 0);
+  mesh(chair, keep(new RoundedBoxGeometry(.113, .104, .51, 2, .036)), fabric, .135, .293, -.012);
+  mesh(chair, keep(new RoundedBoxGeometry(.30, .061, .43, 2, .025)), fabric, -.035, .213, .012);
+  box(chair, .288, .008, .006, 0, .175, -.262, piping);
 
   const television = new THREE.Group();
   television.position.set(-.674, .260, .231);
@@ -375,6 +437,11 @@ export function buildRoom(world, redraw) {
   mesh(scene, keep(new THREE.CylinderGeometry(.026, .022, .052, 24, 1, true)), mug, .777, .410, .321);
   mesh(scene, keep(new THREE.CircleGeometry(.024, 24)), mat('#50362b'), .777, .424, .321).rotation.x = -Math.PI / 2;
   mesh(scene, keep(new THREE.TorusGeometry(.016, .004, 8, 18)), mug, .805, .407, .321);
+  scene.traverse(object => {
+    if (!object.isMesh || !object.material.isMeshStandardMaterial) return;
+    object.castShadow = object.material !== floor && object.material !== rug;
+    object.receiveShadow = true;
+  });
   batchRoom(scene, k);
   return { shadowTex, dispose() { disposed = true; scene.removeFromParent(); k.dispose(); } };
 }

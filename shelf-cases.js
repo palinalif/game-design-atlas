@@ -110,6 +110,8 @@ export function buildCases(scene, rows, shadowTex, firstPage) {
       pivot.rotation.set(0, yaw, lean, 'YXZ');
       group.add(pivot);
       const body = k.box(pivot, width, height, depth, 0, 0, 0, cardboard.get(color));
+      body.castShadow = true;
+      body.receiveShadow = true;
       body.userData.id = game.id;
       bodies.push(body);
       const frontWidth = width * (type === 'jewel' ? .86 : .97);
@@ -118,10 +120,13 @@ export function buildCases(scene, rows, shadowTex, firstPage) {
       const front = k.plane(pivot, frontWidth, frontHeight, frontX, 0, depth / 2 + .0005,
         printed(paperArt(game, packaging, ink), { roughness: paper ? .80 : .53 }));
 
+      front.receiveShadow = true;
+
       if (type !== 'catalog-card') {
         const spine = k.plane(pivot, depth * .92, height * .961, -width / 2 - .0005, 0, 0,
           printed(spineArt(game, packaging, ink)));
         spine.rotation.y = -Math.PI / 2;
+        spine.receiveShadow = true;
       }
       if (type === 'jewel') {
         k.box(pivot, width * .075, height * .98, .0015, -width * .447, 0, depth / 2 + .001, cardboard.get(color));
