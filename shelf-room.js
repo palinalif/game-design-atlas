@@ -60,17 +60,21 @@ function paintedMortar(ctx, width, height) {
   ctx.restore();
 }
 
-function blockTexture(ctx, w, h, image) {
+function masonryPattern(ctx, w, h, image) {
   const pattern = ctx.createPattern(image, 'repeat');
   const tileMeters = 1.61;
   pattern.setTransform(new DOMMatrix([
     w * tileMeters / (4.7 * image.naturalWidth), 0, 0,
     h * tileMeters / (2.8 * image.naturalHeight), 0, 17,
   ]));
+  return pattern;
+}
+
+function blockTexture(ctx, w, h, image) {
   ctx.save();
   ctx.globalCompositeOperation = 'overlay';
   ctx.globalAlpha = .71;
-  ctx.fillStyle = pattern;
+  ctx.fillStyle = masonryPattern(ctx, w, h, image);
   ctx.fillRect(0, 0, w, h);
   ctx.restore();
 }
@@ -251,17 +255,37 @@ export function buildRoom(world, redraw) {
   returnMap.repeat.x = .34;
   returnMap.offset.x = .15;
   returnMap.needsUpdate = true;
+  const returnWall = mat('#b4bbb0', { map: returnMap, roughness: .98 });
   const masonry = new Image();
   masonry.src = './assets/shelf-masonry.webp';
-  masonry.decode().then(() => {
+  masonry.decode().then(async () => {
     if (disposed) return;
     const { image } = wall.map;
     wallFinish(image.getContext('2d'), image.width, image.height, masonry);
     wall.map.needsUpdate = true;
     returnMap.needsUpdate = true;
     redraw();
-  }).catch(() => { /* Keep the procedural paint when the masonry photo is unavailable. */ });
-  const returnWall = mat('#b4bbb0', { map: returnMap, roughness: .98 });
+
+    const height = new Image();
+    height.src = './assets/shelf-masonry-height.webp';
+    await height.decode();
+    if (disposed) return;
+    const bumpMap = keep(canvasTexture(image.width, image.height, (ctx, w, h) => {
+      ctx.fillStyle = masonryPattern(ctx, w, h, height);
+      ctx.fillRect(0, 0, w, h);
+    }));
+    bumpMap.colorSpace = THREE.NoColorSpace;
+    const returnBump = keep(bumpMap.clone());
+    returnBump.repeat.copy(returnMap.repeat);
+    returnBump.offset.copy(returnMap.offset);
+    for (const [material, map] of [[wall, bumpMap], [returnWall, returnBump]]) {
+      material.bumpMap = map;
+      // The supplied height image uses a narrow grayscale range.
+      material.bumpScale = .032;
+      material.needsUpdate = true;
+    }
+    redraw();
+  }).catch(() => { /* Retain the available wall textures when an image fails. */ });
   plane(scene, 1.59, 2.8, -1.10, 1.38, .76, returnWall).rotation.y = Math.PI / 2;
   box(scene, .018, .075, 1.59, -1.089, .038, .76, trim);
   box(scene, 4.7, .075, .021, 0, .038, -.010, trim);
