@@ -243,10 +243,12 @@ export function buildRoom(world, redraw) {
     map: keep(canvasTexture(w, h, draw)), ...options,
   }));
   const board = mat('#edc7a7', { roughness: .56 });
-  const edge = mat('#f4d6af', { roughness: .46 });
-  const back = mat('#bb9d82');
+  const cabinetBoard = mat('#f5d9ba', { roughness: .56 });
+  const edge = mat('#f9dfc1', { roughness: .46 });
+  const back = mat('#c8ab90');
   const floor = mat('#b39a7f');
   const legs = mat('#a18169');
+  const cabinetFeet = mat('#ac8d73');
   const brass = mat('#a98a58', { metalness: .32, roughness: .43 });
   const trim = mat('#89745e');
   const shadowTex = keep(canvasTexture(128, 128, shadowMap));
@@ -254,6 +256,11 @@ export function buildRoom(world, redraw) {
   const occlusion = keep(new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: .61 }));
   const atFloor = (w, d, x, z) => plane(scene, w, d, x, .001, z, contact).rotation.x = -Math.PI / 2;
   let disposed = false;
+  const woodFinishes = [
+    [board, false, .012], [cabinetBoard, false, .012], [edge, false, .008], [floor, false, .014],
+    [back, true, .010], [legs, true, .008], [cabinetFeet, true, .008],
+  ];
+
   new THREE.TextureLoader().load('./assets/shelf-wood.webp', texture => {
     if (disposed) return texture.dispose();
     keep(texture);
@@ -263,8 +270,8 @@ export function buildRoom(world, redraw) {
     const vertical = keep(texture.clone());
     vertical.center.set(.5, .5);
     vertical.rotation = Math.PI / 2;
-    for (const [material, map] of [[board, texture], [edge, texture], [back, vertical], [floor, texture], [legs, vertical]]) {
-      material.map = map;
+    for (const [material, verticalGrain] of woodFinishes) {
+      material.map = verticalGrain ? vertical : texture;
       material.needsUpdate = true;
     }
     redraw();
@@ -278,11 +285,8 @@ export function buildRoom(world, redraw) {
       const verticalBump = keep(bump.clone());
       verticalBump.center.copy(vertical.center);
       verticalBump.rotation = vertical.rotation;
-      for (const [material, heightMap, depth] of [
-        [board, bump, .012], [edge, bump, .008], [floor, bump, .014],
-        [back, verticalBump, .010], [legs, verticalBump, .008],
-      ]) {
-        material.bumpMap = heightMap;
+      for (const [material, verticalGrain, depth] of woodFinishes) {
+        material.bumpMap = verticalGrain ? verticalBump : bump;
         material.bumpScale = depth;
         material.needsUpdate = true;
       }
@@ -366,14 +370,14 @@ export function buildRoom(world, redraw) {
   scene.add(cabinet);
   box(cabinet, .691, 1.108, .018, 0, .677, .027, back);
   for (const x of [-.357, .357]) {
-    box(cabinet, .029, 1.139, .300, x, .682, .169, board);
+    box(cabinet, .029, 1.139, .300, x, .682, .169, cabinetBoard);
     box(cabinet, .011, 1.133, .010, x, .682, .323, edge);
   }
   const crown = keep(new RoundedBoxGeometry(.747, .031, .326, 1, .004));
   mesh(cabinet, crown, board, 0, 1.218, .166);
   box(cabinet, .737, .008, .015, 0, 1.22, .329, edge);
   for (const y of DECKS) {
-    box(cabinet, .743, .020, .321, 0, y - .010, .167, board);
+    box(cabinet, .743, .020, .321, 0, y - .010, .167, cabinetBoard);
     box(cabinet, .727, .012, .006, 0, y - .006, .331, edge);
     plane(cabinet, .705, .144, 0, y + .192, .038, occlusion);
   }
@@ -383,7 +387,7 @@ export function buildRoom(world, redraw) {
   box(cabinet, .676, .006, .009, 0, .203, .294, edge);
   for (const x of [-.301, .301]) {
     for (const z of [.070, .267]) {
-      const foot = box(cabinet, .041, .145, .041, x, .073, z, legs);
+      const foot = box(cabinet, .041, .145, .041, x, .073, z, cabinetFeet);
       foot.rotation.z = -Math.sign(x) * .09;
     }
   }
