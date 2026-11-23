@@ -29,7 +29,7 @@ const aliases = {
   ac: 'Animal Crossing',
   cnc: 'Command & Conquer',
   rct: 'RollerCoaster Tycoon',
-  chibi: 'Chibi-Robo! Plug into Adventure!'
+  civ: "Sid Meier's Civilization"
 };
 const platformTerms = {
   'Game Boy': ['gb', 'game boy'], 'SNES': ['snes', 'super nintendo'],
@@ -104,6 +104,13 @@ if (ids.length) {
   for (const t of times || []) byId.set(t.game_id, t);
 }
 const validHours = value => Number.isFinite(value) && value > 0 && value < 3600 * 10000 ? Math.round(value / 360) / 10 : null;
+function normalizeTimes(t) {
+  const result = { main: validHours(t.hastily), extras: validHours(t.normally), complete: validHours(t.completely), submissions: t.count || 0 };
+  // Don't display contradictory completion categories from small community samples.
+  if (result.main != null && result.extras != null && result.main > result.extras) result.main = null;
+  if (result.extras != null && result.complete != null && result.extras > result.complete) result.complete = null;
+  return result;
+}
 const output = { schemaVersion: 1, updatedAt: new Date().toISOString(), source: 'IGDB', games: { ...(prior.games || {}) } };
 for (const [id, game] of matches) {
   const t = byId.get(game.id);
@@ -113,7 +120,7 @@ for (const [id, game] of matches) {
     igdbId: game.id,
     igdbUrl: /^https:\/\/www\.igdb\.com\/games\//.test(game.url || '') ? game.url : `https://www.igdb.com/games/${encodeURIComponent(String(game.id))}`,
     coverUrl: /^[a-z0-9]+$/i.test(game.cover?.image_id || '') ? `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${game.cover.image_id}.jpg` : (old.coverUrl || null),
-    timeToBeat: t ? { main: validHours(t.hastily), extras: validHours(t.normally), complete: validHours(t.completely), submissions: t.count || 0 } : (old.timeToBeat || null)
+    timeToBeat: t ? normalizeTimes(t) : (old.timeToBeat || null)
   };
 }
 await writeFile(destination, JSON.stringify(output, null, 2) + '\n');
