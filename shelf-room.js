@@ -211,6 +211,28 @@ function batchRoom(root, kit) {
   }
 }
 
+function weaveHeight(width, height, warpSpacing, weftSpacing) {
+  const texture = canvasTexture(width, height, (ctx, w, h) => {
+    const result = ctx.createImageData(w, h);
+    const thread = (index, spacing) => Math.sin(Math.PI * (index % spacing + .5) / spacing) ** 2;
+    const warp = Array.from({ length: w }, (_, x) => thread(x, warpSpacing));
+    const weft = Array.from({ length: h }, (_, y) => thread(y, weftSpacing));
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const warpOver = (Math.floor(x / warpSpacing) + Math.floor(y / weftSpacing)) % 2 === 0;
+        const top = warpOver ? warp[x] : weft[y];
+        const under = warpOver ? weft[y] : warp[x];
+        const index = (y * w + x) * 4;
+        result.data[index] = result.data[index + 1] = result.data[index + 2] = 68 + 127 * top + 35 * under;
+        result.data[index + 3] = 255;
+      }
+    }
+    ctx.putImageData(result, 0, 0);
+  });
+  texture.colorSpace = THREE.NoColorSpace;
+  return texture;
+}
+
 export function buildRoom(world, redraw) {
   const scene = new THREE.Group();
   world.add(scene);
@@ -246,6 +268,26 @@ export function buildRoom(world, redraw) {
       material.needsUpdate = true;
     }
     redraw();
+
+    new THREE.TextureLoader().load('./assets/shelf-wood-height.webp', bump => {
+      if (disposed) return bump.dispose();
+      keep(bump);
+      bump.colorSpace = THREE.NoColorSpace;
+      bump.wrapS = bump.wrapT = THREE.RepeatWrapping;
+      bump.anisotropy = 4;
+      const verticalBump = keep(bump.clone());
+      verticalBump.center.copy(vertical.center);
+      verticalBump.rotation = vertical.rotation;
+      for (const [material, heightMap, depth] of [
+        [board, bump, .012], [edge, bump, .008], [floor, bump, .014],
+        [back, verticalBump, .010], [legs, verticalBump, .008],
+      ]) {
+        material.bumpMap = heightMap;
+        material.bumpScale = depth;
+        material.needsUpdate = true;
+      }
+      redraw();
+    }, undefined, () => { /* The wood color remains visible without the height map. */ });
   }, undefined, () => { /* The wood tones remain available when the map cannot load. */ });
 
   const wallMap = keep(canvasTexture(1536, 896, (ctx, w, h) => wallFinish(ctx, w, h)));
@@ -378,7 +420,7 @@ export function buildRoom(world, redraw) {
       ctx.fillRect(rand() * w, rand() * h, 1 + rand() * 3, 1);
     }
   }));
-  const rug = mat('#fff1de', { map: rugTexture });
+  const rug = mat('#fff1de', { map: rugTexture, bumpMap: keep(weaveHeight(512, 384, 4, 4)), bumpScale: .0017 });
   plane(scene, 1.46, .86, .11, .002, .61, rug).rotation.x = -Math.PI / 2;
 
   // The chair arm in the foreground places the viewer in the sitting area.
@@ -391,7 +433,7 @@ export function buildRoom(world, redraw) {
       ctx.fillRect(rand() * w, rand() * h, 1 + rand() * 2, 1);
     }
   }));
-  const fabric = mat('#cda58d', { map: upholstery });
+  const fabric = mat('#cda58d', { map: upholstery, bumpMap: keep(weaveHeight(384, 384, 4, 5)), bumpScale: .0018 });
   const piping = mat('#593929');
   const chair = new THREE.Group();
   chair.position.set(-.943, 0, 1.084);
@@ -478,7 +520,9 @@ export function buildRoom(world, redraw) {
   cylinder(.054, .066, .018, .009, brass);
   cylinder(.007, .013, .228, .124, brass);
   const shade = mat('#ffe5bc', {
-    map: keep(canvasTexture(192, 96, fabricFinish)), emissive: '#ec9b50', emissiveIntensity: .36,
+    map: keep(canvasTexture(192, 96, fabricFinish)),
+    bumpMap: keep(weaveHeight(192, 96, 4, 3)), bumpScale: .0015,
+    emissive: '#ec9b50', emissiveIntensity: .36,
     side: THREE.DoubleSide,
   });
   mesh(lamp, keep(new THREE.CylinderGeometry(.068, .119, .150, 36, 1, true)), shade, 0, .258, 0);

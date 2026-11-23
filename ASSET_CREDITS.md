@@ -2,7 +2,7 @@
 
 ## Redistributed images
 
-- **Wood Table Worn** by Dimitrios Savva (photography) and Rico Cilliers (processing), [Poly Haven](https://polyhaven.com/a/wood_table_worn). The diffuse map is released under [CC0 1.0](https://polyhaven.com/license), which permits public web use, derivatives and redistribution without required attribution. The 1K JPG diffuse map was resized to 768 × 768 and encoded as WebP. The room applies its own color, repeat and grain orientation in Three.js. The shipped derivative is `assets/shelf-wood.webp` (63,126 bytes).
+- **Wood Table Worn** by Dimitrios Savva (photography) and Rico Cilliers (processing), [Poly Haven](https://polyhaven.com/a/wood_table_worn). The diffuse map is released under [CC0 1.0](https://polyhaven.com/license), which permits public web use, derivatives and redistribution without required attribution. The 1K JPG diffuse map was resized to 768 × 768 and encoded as WebP. The room applies its own color, repeat and grain orientation in Three.js. The shipped derivative is `assets/shelf-wood.webp` (63,126 bytes). The matching 1K displacement JPG was resized to 768 × 768 and encoded as a 78,032-byte WebP height map at `assets/shelf-wood-height.webp`.
 
 - **Concrete Block Wall** by Charlotte Baglioni, [Poly Haven](https://polyhaven.com/a/concrete_block_wall). The diffuse map uses the [CC0 1.0 license](https://polyhaven.com/license). The 1K JPG was converted to a 768 × 768 grayscale, contrast-adjusted WebP. PLAYABLE tiles it under the green paint and room lighting. The derivative is `assets/shelf-masonry.webp` (199,116 bytes). The matching 1K displacement JPG was resized to 768 × 768 and encoded as a 24,170-byte WebP. It is sampled as height data for real-time bump shading at `assets/shelf-masonry-height.webp`.
 
@@ -10,7 +10,7 @@
 
 ## Models and illustrations
 
-The cabinet, room, television, controller, lamp, window glazing, airborne dust, rug, generic package sleeves and title spines were authored for PLAYABLE and generated locally in Three.js or Canvas. Case spines use stylized titles and backs use plain material. Front artwork loads at runtime from the catalog’s existing IGDB and Libretro URLs, with a local title card as fallback.
+The cabinet, room, television, controller, lamp, window glazing, airborne dust, woven fabric height patterns, rug, generic package sleeves and title spines were authored for PLAYABLE and generated locally in Three.js or Canvas. Case spines use stylized titles and backs use plain material. Front artwork loads at runtime from the catalog’s existing IGDB and Libretro URLs, with a local title card as fallback.
 
 The original direction for the basement combines a painted block foundation, a high window, a low ceiling and exposed conduit with warm wood, a shaded table lamp and used media. The Strong's [retail display archive](https://www.museumofplay.org/blog/video-games-and-the-wonders-of-window-shopping/) was a visual reference for the mixture of retail boxes and period accessories. The repository contains the CC0 wood and concrete derivatives, the public-domain painting, and the instructions for generating PLAYABLE’s original props and materials.
 
