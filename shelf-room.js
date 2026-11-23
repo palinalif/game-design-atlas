@@ -233,6 +233,60 @@ function weaveHeight(width, height, warpSpacing, weftSpacing) {
   return texture;
 }
 
+function rubbedFinish(ctx, width, height, seed) {
+  const random = randomGenerator(seed);
+  for (let i = 0; i < 900; i++) {
+    const x = random() * width;
+    const y = height * (.5 + (random() - random()) * .50);
+    const fade = Math.sin(Math.PI * x / width) * (1 - 2 * Math.abs(y / height - .5));
+    const color = i % 7 ? '218,166,107' : '71,37,20';
+    ctx.fillStyle = `rgba(${color},${fade * (.10 + random() * .32)})`;
+    ctx.fillRect(x, y, 1 + random() * 9, .55 + random() * 1.5);
+  }
+}
+
+function addOpenedCase(scene, k, mat) {
+  const jewel = new THREE.Group();
+  jewel.position.set(-.611, .086, .320);
+  jewel.rotation.y = .09;
+  scene.add(jewel);
+  const tray = mat('#343531', { roughness: .43 });
+  const plastic = mat('#756f60', { roughness: .28 });
+  const pages = mat('#b3a188');
+  const booklet = mat('#626153');
+  const metallicDisc = mat('#b2ada0', { metalness: .57, roughness: .31 });
+  const label = mat('#786352', { roughness: .78 });
+
+  const manual = new THREE.Group();
+  manual.rotation.y = .17;
+  manual.position.set(-.012, .002, .025);
+  jewel.add(manual);
+  k.box(manual, .123, .005, .093, 0, 0, 0, pages);
+  k.box(manual, .125, .001, .095, 0, .003, 0, booklet);
+  k.box(manual, .096, .0008, .008, -.004, .0038, .037, pages);
+
+  k.mesh(jewel, k.keep(new RoundedBoxGeometry(.135, .009, .109, 1, .002)), tray, 0, .011, 0);
+  const lip = k.keep(new RoundedBoxGeometry(.134, .003, .004, 1, .001));
+  for (const z of [-.052, .052]) k.mesh(jewel, lip, plastic, 0, .017, z);
+  const wheel = (radius, innerRadius, height, material) => {
+    const ring = k.mesh(jewel, k.keep(new THREE.RingGeometry(innerRadius, radius, 48)), material, 0, height, 0);
+    ring.rotation.x = -Math.PI / 2;
+  };
+  wheel(.051, .007, .0175, metallicDisc);
+  wheel(.044, .019, .0177, label);
+  wheel(.015, .010, .0177, metallicDisc);
+  k.mesh(jewel, k.keep(new THREE.CylinderGeometry(.006, .006, .003, 12)), tray, 0, .018, 0);
+
+  const lid = new THREE.Group();
+  lid.position.set(0, .016, -.053);
+  lid.rotation.x = -.23;
+  jewel.add(lid);
+  k.box(lid, .134, .108, .006, 0, .054, 0, plastic);
+  k.box(lid, .119, .095, .001, 0, .054, .0036, booklet);
+  k.box(lid, .086, .022, .001, -.008, .080, .0046, pages);
+  for (const y of [.034, .043, .052]) k.box(lid, .074, .002, .001, -.010, y, .0046, pages);
+}
+
 export function buildRoom(world, redraw) {
   const scene = new THREE.Group();
   world.add(scene);
@@ -370,12 +424,21 @@ export function buildRoom(world, redraw) {
     box(cabinet, .029, 1.139, .300, x, .682, .169, cabinetBoard);
     box(cabinet, .011, 1.133, .010, x, .682, .323, edge);
   }
+  const rubMaterial = (seed, opacity) => keep(new THREE.MeshBasicMaterial({
+    map: keep(canvasTexture(512, 32, (ctx, w, h) => rubbedFinish(ctx, w, h, seed))),
+    transparent: true, opacity, depthWrite: false,
+  }));
+  const shelfRub = rubMaterial(42, .56);
+  const pullRub = rubMaterial(97, .44);
+  const shelfBoard = keep(new RoundedBoxGeometry(.743, .020, .321, 1, .0025));
+  const shelfLip = keep(new RoundedBoxGeometry(.727, .012, .006, 1, .0015));
   const crown = keep(new RoundedBoxGeometry(.747, .031, .326, 1, .004));
   mesh(cabinet, crown, cabinetBoard, 0, 1.218, .166);
   box(cabinet, .737, .008, .015, 0, 1.22, .329, edge);
   for (const y of DECKS) {
-    box(cabinet, .743, .020, .321, 0, y - .010, .167, cabinetBoard);
-    box(cabinet, .727, .012, .006, 0, y - .006, .331, edge);
+    mesh(cabinet, shelfBoard, cabinetBoard, 0, y - .010, .167);
+    mesh(cabinet, shelfLip, edge, 0, y - .006, .331);
+    plane(cabinet, .645, .008, 0, y - .006, .3345, shelfRub);
     plane(cabinet, .705, .144, 0, y + .192, .038, occlusion);
   }
   box(cabinet, .700, .087, .25, 0, .164, .145, back);
@@ -389,6 +452,7 @@ export function buildRoom(world, redraw) {
     }
   }
   for (const x of [-.174, .174]) {
+    plane(cabinet, .088, .023, x, .170, .2948, pullRub);
     box(cabinet, .006, .014, .010, x - .023, .170, .297, brass);
     box(cabinet, .006, .014, .010, x + .023, .170, .297, brass);
     box(cabinet, .055, .009, .007, x, .170, .304, brass);
@@ -477,7 +541,7 @@ export function buildRoom(world, redraw) {
   for (const x of [-.849, -.499]) box(scene, .033, .245, .30, x, .123, .218, board);
   box(scene, .368, .024, .30, -.674, .072, .216, board);
   const controller = new THREE.Group();
-  controller.position.set(-.683, .094, .342);
+  controller.position.set(-.749, .094, .341);
   controller.rotation.y = -.17;
   scene.add(controller);
   box(controller, .107, .013, .045, 0, 0, 0, panel);
@@ -487,10 +551,12 @@ export function buildRoom(world, redraw) {
   const button = keep(new THREE.CylinderGeometry(.005, .005, .004, 10));
   for (const x of [.023, .037]) mesh(controller, button, red, x, .008, 0);
   const wire = new THREE.CatmullRomCurve3([
-    [-.684,.093,.318],[-.712,.090,.275],[-.756,.097,.241],[-.759,.093,.211],
-    [-.713,.094,.206],[-.694,.090,.239],[-.711,.097,.262],[-.733,.095,.252],[-.765,.147,.173],
+    [-.749, .093, .320], [-.787, .090, .313], [-.811, .088, .333], [-.822, .061, .372],
+    [-.835, .010, .433], [-.874, .006, .503], [-.919, .006, .563], [-.907, .006, .611],
+    [-.854, .006, .565], [-.812, .007, .489], [-.783, .020, .389], [-.767, .092, .200],
   ].map(coordinates => new THREE.Vector3(...coordinates)));
-  mesh(scene, keep(new THREE.TubeGeometry(wire, 24, .0016, 5)), tvBezel, 0, 0, 0);
+  mesh(scene, keep(new THREE.TubeGeometry(wire, 48, .0018, 5)), tvBezel, 0, 0, 0);
+  addOpenedCase(scene, k, mat);
   atFloor(.57, .42, -.667, .282);
   const print = new THREE.Group();
   print.position.set(.722, .951, .031);

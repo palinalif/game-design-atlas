@@ -10,7 +10,7 @@
 
 ## Models and illustrations
 
-The cabinet, room, television, controller, lamp, window glazing, airborne dust, woven fabric height patterns, rug, generic package sleeves and title spines were authored for PLAYABLE and generated locally in Three.js or Canvas. Case spines use stylized titles and backs use plain material. Front artwork loads at runtime from the catalog’s existing IGDB and Libretro URLs, with a local title card as fallback.
+The cabinet, room, television, controller, open jewel case and manual, cabinet wear, lamp, window glazing, airborne dust, woven fabric height patterns, rug, generic package sleeves and title spines were authored for PLAYABLE and generated locally in Three.js or Canvas. Case spines use stylized titles and backs use plain material. Front artwork loads at runtime from the catalog’s existing IGDB and Libretro URLs, with a local title card as fallback.
 
 The original direction for the basement combines a painted block foundation, a high window, a low ceiling and exposed conduit with warm wood, a shaded table lamp and used media. The Strong's [retail display archive](https://www.museumofplay.org/blog/video-games-and-the-wonders-of-window-shopping/) was a visual reference for the mixture of retail boxes and period accessories. The repository contains the CC0 wood and concrete derivatives, the public-domain painting, and the instructions for generating PLAYABLE’s original props and materials.
 
