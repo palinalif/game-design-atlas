@@ -1,6 +1,383 @@
 {
   "schemaVersion": 1,
-  "updatedAt": null,
+  "updatedAt": "2026-11-23T11:08:15.312Z",
   "source": "IGDB",
-  "games": {}
+  "games": {
+    "tetris": {
+      "igdbId": 180279,
+      "igdbUrl": "https://www.igdb.com/games/tetris--7",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co9l37.jpg",
+      "timeToBeat": null
+    },
+    "simcity": {
+      "igdbId": 180001,
+      "igdbUrl": "https://www.igdb.com/games/simcity--2",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co49sb.jpg",
+      "timeToBeat": null
+    },
+    "sf2": {
+      "igdbId": 3186,
+      "igdbUrl": "https://www.igdb.com/games/street-fighter-ii",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co55et.jpg",
+      "timeToBeat": null
+    },
+    "dune2": {
+      "igdbId": 86,
+      "igdbUrl": "https://www.igdb.com/games/dune-ii-the-building-of-a-dynasty",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4vw0.jpg",
+      "timeToBeat": null
+    },
+    "doom": {
+      "igdbId": 673,
+      "igdbUrl": "https://www.igdb.com/games/doom",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5rav.jpg",
+      "timeToBeat": {
+        "main": 4.2,
+        "extras": 7,
+        "complete": 14.8,
+        "submissions": 4
+      }
+    },
+    "nbajam": {
+      "igdbId": 8995,
+      "igdbUrl": "https://www.igdb.com/games/nba-jam--1",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6ze0.jpg",
+      "timeToBeat": {
+        "main": 1,
+        "extras": 1,
+        "complete": 3,
+        "submissions": 1
+      }
+    },
+    "myst": {
+      "igdbId": 236,
+      "igdbUrl": "https://www.igdb.com/games/myst",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1y96.jpg",
+      "timeToBeat": {
+        "main": 7,
+        "extras": null,
+        "complete": 8,
+        "submissions": 3
+      }
+    },
+    "supermetroid": {
+      "igdbId": 1103,
+      "igdbUrl": "https://www.igdb.com/games/super-metroid",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5osy.jpg",
+      "timeToBeat": {
+        "main": 3.5,
+        "extras": 10.1,
+        "complete": 12.2,
+        "submissions": 7
+      }
+    },
+    "chrono": {
+      "igdbId": 1802,
+      "igdbUrl": "https://www.igdb.com/games/chrono-trigger",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3plw.jpg",
+      "timeToBeat": {
+        "main": 17.5,
+        "extras": 29.2,
+        "complete": 45,
+        "submissions": 4
+      }
+    },
+    "cnc": {
+      "igdbId": 647,
+      "igdbUrl": "https://www.igdb.com/games/command-conquer",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co88m7.jpg",
+      "timeToBeat": null
+    },
+    "mario64": {
+      "igdbId": 1074,
+      "igdbUrl": "https://www.igdb.com/games/super-mario-64",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co721v.jpg",
+      "timeToBeat": {
+        "main": 8.4,
+        "extras": 13,
+        "complete": 14,
+        "submissions": 8
+      }
+    },
+    "pokemon": {
+      "igdbId": 1561,
+      "igdbUrl": "https://www.igdb.com/games/pokemon-red-version",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5pi4.jpg",
+      "timeToBeat": {
+        "main": 2,
+        "extras": 38.3,
+        "complete": 60,
+        "submissions": 6
+      }
+    },
+    "tombraider": {
+      "igdbId": 912,
+      "igdbUrl": "https://www.igdb.com/games/tomb-raider",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3hfx.jpg",
+      "timeToBeat": {
+        "main": 9,
+        "extras": 18.7,
+        "complete": 24,
+        "submissions": 6
+      }
+    },
+    "gt": {
+      "igdbId": 1594,
+      "igdbUrl": "https://www.igdb.com/games/gran-turismo",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6e10.jpg",
+      "timeToBeat": {
+        "main": 10,
+        "extras": 25,
+        "complete": 50,
+        "submissions": 1
+      }
+    },
+    "themehospital": {
+      "igdbId": 216009,
+      "igdbUrl": "https://www.igdb.com/games/theme-hospital--1",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co56ml.jpg",
+      "timeToBeat": null
+    },
+    "goldeneye": {
+      "igdbId": 1638,
+      "igdbUrl": "https://www.igdb.com/games/goldeneye-007",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cocckw.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 9,
+        "complete": null,
+        "submissions": 1
+      }
+    },
+    "oot": {
+      "igdbId": 1029,
+      "igdbUrl": "https://www.igdb.com/games/the-legend-of-zelda-ocarina-of-time",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3nnx.jpg",
+      "timeToBeat": {
+        "main": 8.7,
+        "extras": 31.1,
+        "complete": 45.8,
+        "submissions": 12
+      }
+    },
+    "mgs": {
+      "igdbId": 375,
+      "igdbUrl": "https://www.igdb.com/games/metal-gear-solid",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobpak.jpg",
+      "timeToBeat": {
+        "main": 22,
+        "extras": 12.2,
+        "complete": null,
+        "submissions": 10
+      }
+    },
+    "ddr": {
+      "igdbId": 3679,
+      "igdbUrl": "https://www.igdb.com/games/dance-dance-revolution",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2puf.jpg",
+      "timeToBeat": null
+    },
+    "rct": {
+      "igdbId": 254,
+      "igdbUrl": "https://www.igdb.com/games/rollercoaster-tycoon",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2r6q.jpg",
+      "timeToBeat": null
+    },
+    "thps2": {
+      "igdbId": 913,
+      "igdbUrl": "https://www.igdb.com/games/tony-hawk-s-pro-skater-2",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1y77.jpg",
+      "timeToBeat": null
+    },
+    "sims": {
+      "igdbId": 223,
+      "igdbUrl": "https://www.igdb.com/games/the-sims",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co8j9a.jpg",
+      "timeToBeat": null
+    },
+    "mm": {
+      "igdbId": 1030,
+      "igdbUrl": "https://www.igdb.com/games/the-legend-of-zelda-majora-s-mask",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3pah.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 23.4,
+        "complete": null,
+        "submissions": 3
+      }
+    },
+    "ico": {
+      "igdbId": 7170,
+      "igdbUrl": "https://www.igdb.com/games/ico",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3r78.jpg",
+      "timeToBeat": {
+        "main": 3,
+        "extras": 7,
+        "complete": 10,
+        "submissions": 3
+      }
+    },
+    "gta3": {
+      "igdbId": 730,
+      "igdbUrl": "https://www.igdb.com/games/grand-theft-auto-iii",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2lb8.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 18.7,
+        "complete": 38.7,
+        "submissions": 5
+      }
+    },
+    "ac": {
+      "igdbId": 2655,
+      "igdbUrl": "https://www.igdb.com/games/animal-crossing",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3wmn.jpg",
+      "timeToBeat": null
+    },
+    "pikmin": {
+      "igdbId": 2239,
+      "igdbUrl": "https://www.igdb.com/games/pikmin",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co6nqg.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 4,
+        "complete": 4,
+        "submissions": 1
+      }
+    },
+    "prime": {
+      "igdbId": 1105,
+      "igdbUrl": "https://www.igdb.com/games/metroid-prime",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3w4w.jpg",
+      "timeToBeat": {
+        "main": 7.3,
+        "extras": 13.3,
+        "complete": 17.8,
+        "submissions": 4
+      }
+    },
+    "warioware": {
+      "igdbId": 1703,
+      "igdbUrl": "https://www.igdb.com/games/warioware-inc-dot-mega-microgame$",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1wpz.jpg",
+      "timeToBeat": {
+        "main": 2,
+        "extras": 4,
+        "complete": 21,
+        "submissions": 1
+      }
+    },
+    "pop": {
+      "igdbId": 836,
+      "igdbUrl": "https://www.igdb.com/games/prince-of-persia-the-sands-of-time",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co4t8l.jpg",
+      "timeToBeat": {
+        "main": 4.5,
+        "extras": 10.3,
+        "complete": 11,
+        "submissions": 7
+      }
+    },
+    "ssx3": {
+      "igdbId": 4174,
+      "igdbUrl": "https://www.igdb.com/games/ssx-3",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1o4m.jpg",
+      "timeToBeat": null
+    },
+    "katamari": {
+      "igdbId": 6453,
+      "igdbUrl": "https://www.igdb.com/games/katamari-damacy",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co67mq.jpg",
+      "timeToBeat": null
+    },
+    "pikmin2": {
+      "igdbId": 2240,
+      "igdbUrl": "https://www.igdb.com/games/pikmin-2",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co5y6q.jpg",
+      "timeToBeat": null
+    },
+    "nfl2k5": {
+      "igdbId": 7881,
+      "igdbUrl": "https://www.igdb.com/games/espn-nfl-2k5",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2xij.jpg",
+      "timeToBeat": null
+    },
+    "re4": {
+      "igdbId": 974,
+      "igdbUrl": "https://www.igdb.com/games/resident-evil-4",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co2wk8.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 24,
+        "complete": null,
+        "submissions": 1
+      }
+    },
+    "sotc": {
+      "igdbId": 2207,
+      "igdbUrl": "https://www.igdb.com/games/shadow-of-the-colossus",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1ozz.jpg",
+      "timeToBeat": {
+        "main": 7,
+        "extras": 9.1,
+        "complete": 19.5,
+        "submissions": 5
+      }
+    },
+    "okami": {
+      "igdbId": 1271,
+      "igdbUrl": "https://www.igdb.com/games/okami",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3mpk.jpg",
+      "timeToBeat": {
+        "main": 15,
+        "extras": 20,
+        "complete": 40,
+        "submissions": 1
+      }
+    },
+    "rhythm": {
+      "igdbId": 6557,
+      "igdbUrl": "https://www.igdb.com/games/rhythm-tengoku",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobw0q.jpg",
+      "timeToBeat": {
+        "main": 4,
+        "extras": 6,
+        "complete": null,
+        "submissions": 2
+      }
+    },
+    "wiisports": {
+      "igdbId": 2181,
+      "igdbUrl": "https://www.igdb.com/games/wii-sports",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co3vge.jpg",
+      "timeToBeat": {
+        "main": 9,
+        "extras": 13,
+        "complete": 22,
+        "submissions": 1
+      }
+    },
+    "portal": {
+      "igdbId": 71,
+      "igdbUrl": "https://www.igdb.com/games/portal",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coay61.jpg",
+      "timeToBeat": {
+        "main": 1.9,
+        "extras": 4,
+        "complete": 7.4,
+        "submissions": 50
+      }
+    },
+    "papers": {
+      "igdbId": 2935,
+      "igdbUrl": "https://www.igdb.com/games/papers-please",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co1vep.jpg",
+      "timeToBeat": {
+        "main": 4,
+        "extras": 6.2,
+        "complete": 31.7,
+        "submissions": 16
+      }
+    }
+  }
 }
