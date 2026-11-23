@@ -1,0 +1,38 @@
+name: Refresh game metadata (IGDB)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '27 8 * * 1' # Weekly, Monday 08:27 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-game-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch IGDB covers and completion estimates
+        env:
+          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+        run: node scripts/sync-igdb.mjs
+      - name: Commit updated public data cache
+        run: |
+          if git diff --quiet -- data/enrichment.json; then
+            echo 'No cached-data changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/enrichment.json
+          git commit -m 'chore: refresh IGDB game metadata cache'
+          git push
