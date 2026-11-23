@@ -17,14 +17,11 @@ function paintWash(ctx, x, y, radiusX, radiusY, colorStops) {
   ctx.restore();
 }
 
-function wallFinish(ctx, w, h) {
-  const paint = ctx.createLinearGradient(w * .27, h * .56, w * .78, h);
-  paint.addColorStop(0, '#344a3e');
-  paint.addColorStop(.48, '#2a3d34');
-  paint.addColorStop(1, '#182923');
-  ctx.fillStyle = paint;
-  ctx.fillRect(0, 0, w, h);
-
+function paintedMortar(ctx, width, height) {
+  const w = 1024;
+  const h = 640;
+  ctx.save();
+  ctx.scale(width / w, height / h);
   const random = randomGenerator(31);
   for (let y = -5, row = 0; y < h; y += 41, row++) {
     // Filled joints and a low-sheen paint coat soften the block edges.
@@ -59,6 +56,32 @@ function wallFinish(ctx, w, h) {
     ctx.fillStyle = i % 2 ? '#e2d9a40e' : '#12241a27';
     ctx.fillRect(random() * w, random() * h, .8 + random(), .85);
   }
+  ctx.restore();
+}
+
+function blockTexture(ctx, w, h, image) {
+  const pattern = ctx.createPattern(image, 'repeat');
+  const tileMeters = 1.61;
+  pattern.setTransform(new DOMMatrix([
+    w * tileMeters / (4.7 * image.naturalWidth), 0, 0,
+    h * tileMeters / (2.8 * image.naturalHeight), 0, 17,
+  ]));
+  ctx.save();
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.globalAlpha = .71;
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
+}
+
+function wallFinish(ctx, w, h, masonry) {
+  const paint = ctx.createLinearGradient(w * .27, h * .56, w * .78, h);
+  paint.addColorStop(0, '#344a3e');
+  paint.addColorStop(.48, '#2a3d34');
+  paint.addColorStop(1, '#182923');
+  ctx.fillStyle = paint;
+  ctx.fillRect(0, 0, w, h);
+  if (!masonry) paintedMortar(ctx, w, h);
 
   paintWash(ctx, w * .423, h * .55, w * .22, h * .32, [
     [0, '#a4bbc649'],
@@ -71,6 +94,8 @@ function wallFinish(ctx, w, h) {
     [.58, '#b777452c'],
     [1, '#9f674100'],
   ]);
+
+  if (masonry) blockTexture(ctx, w, h, masonry);
 }
 
 function windowView(ctx, w, h) {
@@ -225,7 +250,7 @@ export function buildRoom(world, redraw) {
     redraw();
   }, undefined, () => { /* The wood tones remain available when the map cannot load. */ });
 
-  const wall = painted(1024, 640, wallFinish);
+  const wall = painted(1536, 896, (ctx, w, h) => wallFinish(ctx, w, h));
   plane(scene, 4.7, 2.8, 0, 1.38, -.033, wall);
   const wallShadows = keep(new THREE.ShadowMaterial({ opacity: .23, depthWrite: false }));
   plane(scene, 4.7, 2.8, 0, 1.38, -.030, wallShadows).receiveShadow = true;
@@ -233,6 +258,16 @@ export function buildRoom(world, redraw) {
   returnMap.repeat.x = .34;
   returnMap.offset.x = .15;
   returnMap.needsUpdate = true;
+  const masonry = new Image();
+  masonry.src = './assets/shelf-masonry.webp';
+  masonry.decode().then(() => {
+    if (disposed) return;
+    const { image } = wall.map;
+    wallFinish(image.getContext('2d'), image.width, image.height, masonry);
+    wall.map.needsUpdate = true;
+    returnMap.needsUpdate = true;
+    redraw();
+  }).catch(() => { /* Keep the procedural paint when the masonry photo is unavailable. */ });
   const returnWall = keep(new THREE.MeshBasicMaterial({ map: returnMap, color: '#8a9b91' }));
   plane(scene, 1.59, 2.8, -1.10, 1.38, .76, returnWall).rotation.y = Math.PI / 2;
   box(scene, .018, .075, 1.59, -1.089, .038, .76, trim);
