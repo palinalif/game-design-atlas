@@ -2,6 +2,10 @@ name: Refresh game metadata (IGDB)
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/sync-igdb.mjs'
+      - '.github/workflows/refresh-game-data.yml'
   schedule:
     - cron: '27 8 * * 1' # Weekly, Monday 08:27 UTC
 
