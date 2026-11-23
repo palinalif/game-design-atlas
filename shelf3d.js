@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { buildRoom } from './shelf-room.js';
 import { buildCases, updateCover } from './shelf-cases.js';
+import { WINDOW_CENTER } from './shelf-window.js';
 
 const { ROWS_PER_SHELF } = globalThis.PlayableShelfCatalog;
 
@@ -28,19 +29,22 @@ function startShelf() {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#27382e');
-  scene.add(new THREE.HemisphereLight(0xffede0, 0x827568, 1.09));
-  const daylight = new THREE.DirectionalLight(0xffddb4, 2.46);
-  daylight.position.set(-1.42, 2.26, 1.02);
-  daylight.target.position.set(.03, .61, .21);
+  scene.add(new THREE.HemisphereLight(0xe1e6e8, 0xa18469, 1.06));
+  const daylight = new THREE.SpotLight(0xe6edf4, 5.4, 3.9, .84, .86, 2);
+  daylight.position.copy(WINDOW_CENTER).add(new THREE.Vector3(0, .029, .049));
+  daylight.target.position.set(.07, .50, 1.18);
   daylight.castShadow = true;
   daylight.shadow.mapSize.set(1024, 1024);
-  Object.assign(daylight.shadow.camera, { left: -1.50, right: 1.50, bottom: -1.35, top: 1.35, near: .15, far: 4.6 });
-  daylight.shadow.normalBias = .003;
-  daylight.shadow.radius = 3;
-  daylight.shadow.intensity = .68;
+  daylight.shadow.camera.near = .04;
+  daylight.shadow.camera.far = 3.9;
+  daylight.shadow.normalBias = .0028;
+  daylight.shadow.radius = 4;
+  daylight.shadow.intensity = .76;
   scene.add(daylight, daylight.target);
-  const bounce = new THREE.DirectionalLight(0xd9e6ed, .76);
-  bounce.position.set(2, 1.3, 1.6);
+
+  // Broad reflected light reaches the front of the cabinet from the room.
+  const bounce = new THREE.DirectionalLight(0xffe7cd, 1.8);
+  bounce.position.set(1.2, 1.65, 2.1);
   scene.add(bounce);
 
   const camera = new THREE.PerspectiveCamera(34, 1, .08, 12);

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { canvasTexture, kit, randomGenerator, surface } from './shelf-graphics.js';
+import { addBasementWindow, addWindowDust } from './shelf-window.js';
 
 export const DECKS = [.983, .734, .485, .236];
 export const CASE_FRONT = .245;
@@ -83,9 +84,9 @@ function wallFinish(ctx, w, h, masonry) {
   ctx.fillRect(0, 0, w, h);
   if (!masonry) paintedMortar(ctx, w, h);
 
-  paintWash(ctx, w * .423, h * .55, w * .22, h * .32, [
-    [0, '#a4bbc649'],
-    [.40, '#84a4b532'],
+  paintWash(ctx, w * .423, h * .526, w * .15, h * .20, [
+    [0, '#a4bbc634'],
+    [.40, '#84a4b51e'],
     [1, '#6c9baa00'],
   ]);
   paintWash(ctx, w * .648, h * .782, w * .123, h * .255, [
@@ -96,23 +97,19 @@ function wallFinish(ctx, w, h, masonry) {
   ]);
 
   if (masonry) blockTexture(ctx, w, h, masonry);
-}
 
-function windowView(ctx, w, h) {
-  const background = ctx.createLinearGradient(0, 0, 0, h);
-  background.addColorStop(0, '#adc8ce');
-  background.addColorStop(.5, '#b4c5aa');
-  background.addColorStop(1, '#61766a');
-  ctx.fillStyle = background;
-  ctx.fillRect(0, 0, w, h);
-  const random = randomGenerator(19);
-  ctx.filter = 'blur(4px)';
-  for (let i = 0; i < 200; i++) {
-    const height = random();
-    ctx.fillStyle = ['#9cb29263', '#3d615b70', '#e4d8a863', '#a7bdac6c'][i % 4];
-    ctx.beginPath();
-    ctx.ellipse(w * random(), h * (.38 + height * .68), 12 + random() * 34, 6 + random() * 27, random(), 0, Math.PI * 2);
-    ctx.fill();
+  const dirt = randomGenerator(207);
+  for (let i = 0; i < 37; i++) {
+    paintWash(ctx, w * (.355 + dirt() * .155), h * (.565 + dirt() * .14),
+      w * (.001 + dirt() * .004), h * (.008 + dirt() * .048), [
+        [0, '#25291c2a'], [.5, '#25291c1b'], [1, '#25291c00'],
+      ]);
+  }
+  for (let i = 0; i < 26; i++) {
+    const x = w * (.26 + dirt() * .54);
+    paintWash(ctx, x, h * (.90 + dirt() * .085), w * (.008 + dirt() * .025), h * (.009 + dirt() * .022), [
+      [0, i % 3 ? '#0b171d32' : '#7e75513d'], [1, '#1b282100'],
+    ]);
   }
 }
 
@@ -136,28 +133,6 @@ function glassFinish(ctx, w, h) {
     [0, '#8da9a622'],
     [1, '#8da9a600'],
   ]);
-}
-
-function framedPrint(ctx, w, h) {
-  ctx.fillStyle = '#e7d5a8';
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#caa37e';
-  ctx.fillRect(22, 25, w - 44, h - 50);
-  ctx.fillStyle = '#bd6d4e';
-  ctx.beginPath();
-  ctx.arc(w * .64, h * .39, w * .14, 0, Math.PI * 2);
-  ctx.fill();
-  for (const [height, tint] of [[.54, '#746e59'], [.64, '#4f594e'], [.74, '#343f38']]) {
-    ctx.beginPath();
-    ctx.moveTo(22, h * (height + .08));
-    ctx.lineTo(w * .36, h * (height - .07));
-    ctx.lineTo(w * .72, h * (height + .04));
-    ctx.lineTo(w - 22, h * height);
-    ctx.lineTo(w - 22, h - 25);
-    ctx.lineTo(22, h - 25);
-    ctx.fillStyle = tint;
-    ctx.fill();
-  }
 }
 
 function shadowMap(ctx, w, h) {
@@ -282,18 +257,13 @@ export function buildRoom(world, redraw) {
 
   // The recessed window sits under the ceiling, above the outdoor soil line.
   const well = mat('#414336');
-  const windowFrame = mat('#b1a98e');
   const conduit = mat('#4b5243', { roughness: .73 });
   box(scene, 3.45, .065, .149, .625, 1.541, .042, well);
   box(scene, 3.45, .018, .08, .625, 1.492, .022, conduit);
   box(scene, .153, .065, 1.56, -1.042, 1.541, .806, well);
   box(scene, .079, .018, 1.56, -1.061, 1.492, .806, conduit);
-  box(scene, .676, .223, .037, -.342, 1.364, .010, well);
-  plane(scene, .630, .195, -.342, 1.365, .032, painted(416, 144, windowView));
-  box(scene, .676, .019, .061, -.342, 1.260, .048, windowFrame);
-  box(scene, .676, .019, .061, -.342, 1.468, .044, windowFrame);
-  for (const x of [-.670, -.342, -.014]) box(scene, .020, .206, .045, x, 1.364, .046, windowFrame);
-  box(scene, .693, .015, .090, -.342, 1.250, .043, trim);
+  addBasementWindow(scene, k, mat, painted);
+  addWindowDust(scene, k);
 
   const pipePath = new THREE.CurvePath();
   const start = new THREE.Vector3(-1.018, 1.46, 1.50);
@@ -440,11 +410,22 @@ export function buildRoom(world, redraw) {
   mesh(scene, keep(new THREE.TubeGeometry(wire, 24, .0016, 5)), tvBezel, 0, 0, 0);
   atFloor(.57, .42, -.667, .282);
   const print = new THREE.Group();
-  print.position.set(.728, .963, .032);
+  print.position.set(.722, .951, .031);
   print.rotation.z = -.044;
   scene.add(print);
-  box(print, .292, .352, .026, 0, 0, 0, legs);
-  plane(print, .269, .327, 0, 0, .014, painted(256, 320, framedPrint));
+  box(print, .299, .218, .019, 0, 0, 0, legs);
+  const frame = mat('#6e5743', { roughness: .53 });
+  for (const y of [-.105, .105]) box(print, .303, .012, .016, 0, y, .011, frame);
+  for (const x of [-.146, .146]) box(print, .012, .205, .016, x, 0, .011, frame);
+  const landscape = mat('#938675', { roughness: .94 });
+  plane(print, .281, .197, 0, 0, .013, landscape);
+  new THREE.TextureLoader().load('./assets/shelf-landscape.webp', texture => {
+    if (disposed) return texture.dispose();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    landscape.map = keep(texture);
+    landscape.needsUpdate = true;
+    redraw();
+  }, undefined, () => { /* The frame retains its neutral backing if the image fails. */ });
 
   box(scene, .379, .030, .323, .665, .367, .237, board);
   for (const x of [.504, .826]) {
