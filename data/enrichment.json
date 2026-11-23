@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-23T11:08:15.312Z",
+  "updatedAt": "2026-11-23T11:10:10.327Z",
   "source": "IGDB",
   "games": {
     "tetris": {
@@ -165,7 +165,7 @@
       "igdbUrl": "https://www.igdb.com/games/metal-gear-solid",
       "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobpak.jpg",
       "timeToBeat": {
-        "main": 22,
+        "main": null,
         "extras": 12.2,
         "complete": null,
         "submissions": 10
@@ -377,6 +377,23 @@
         "extras": 6.2,
         "complete": 31.7,
         "submissions": 16
+      }
+    },
+    "civ": {
+      "igdbId": 355843,
+      "igdbUrl": "https://www.igdb.com/games/sid-meiers-civilization--1",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/coa549.jpg",
+      "timeToBeat": null
+    },
+    "chibi": {
+      "igdbId": 3856,
+      "igdbUrl": "https://www.igdb.com/games/chibi-robo",
+      "coverUrl": "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/cobx7s.jpg",
+      "timeToBeat": {
+        "main": null,
+        "extras": 16,
+        "complete": 20,
+        "submissions": 1
       }
     }
   }
